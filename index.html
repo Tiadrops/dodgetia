@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dodgetia - Skillshot Dodge</title>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        background: #0e0f13;
+        color: #e8e9ee;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      }
+      .wrap {
+        height: 100%;
+        display: grid;
+        place-items: center;
+      }
+      #game {
+        background: radial-gradient(ellipse at center, #1c2030 0%, #121521 70%);
+        border: 1px solid #2a2f45;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+      .hud {
+        position: fixed;
+        inset: 0 auto auto 0;
+        padding: 8px 10px;
+        color: #c7cbde;
+        font-size: 14px;
+        opacity: 0.9;
+        user-select: none;
+      }
+      .overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.45);
+        text-align: center;
+      }
+      .overlay.show { display: flex; }
+      .panel {
+        background: #161a27;
+        border: 1px solid #2a2f45;
+        padding: 18px 22px;
+        border-radius: 8px;
+        min-width: 320px;
+      }
+      .panel h1 {
+        margin: 0 0 6px 0;
+        font-size: 20px;
+      }
+      .panel p { margin: 6px 0; color: #c7cbde; }
+      .panel .btn {
+        margin-top: 10px;
+        padding: 8px 12px;
+        background: #2e3653;
+        border: 1px solid #3c4570;
+        border-radius: 6px;
+        cursor: pointer;
+        color: #e8e9ee;
+      }
+      .btn:active { transform: translateY(1px); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <canvas id="game" width="960" height="540"></canvas>
+    </div>
+    <div class="hud" id="hud">Right-click to move / Survival: 0.0s / Hits: 0</div>
+    <div class="overlay" id="overlay">
+      <div class="panel">
+        <h1 id="ov-title">Dodgetia</h1>
+        <p id="ov-desc">右クリックで目的地を指定して弾を避けよう。</p>
+        <p id="ov-score"></p>
+        <button class="btn" id="ov-btn">スタート</button>
+      </div>
+    </div>
+    <script src="src/main.js"></script>
+  </body>
+  </html>
