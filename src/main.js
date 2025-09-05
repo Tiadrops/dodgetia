@@ -42,6 +42,10 @@ const SPRITE_H = 73;
 const SPRITE_FRAMES = 8;
 let tiaImage;
 
+// Units: 1m = 55px (fixed)
+const METER = 55;
+const PLAYER_SPEED_MPS = 3.9; // meters per second
+
 // --- Utility ---
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const dist2 = (ax, ay, bx, by) => {
@@ -71,7 +75,7 @@ const player = {
   x: VIEW_W / 2,
   y: VIEW_H / 2,
   radius: 18,
-  speed: 210, // px/s
+  speed: PLAYER_SPEED_MPS * METER, // px/s
   targetX: null,
   targetY: null,
   moving: false,
@@ -178,7 +182,7 @@ function gameOver() {
   overlay.classList.add('show');
   ovTitle.textContent = 'Game Over';
   ovDesc.textContent = 'You got hit!';
-  ovScore.textContent = `Survival: ${state.time.toFixed(1)}s / Hits: ${state.hits}`;
+  ovScore.textContent = `Survival: ${state.time.toFixed(1)}s | Hits: ${state.hits} | Speed: ${PLAYER_SPEED_MPS.toFixed(1)} m/s`;
   ovBtn.textContent = 'Restart';
 }
 
@@ -260,7 +264,7 @@ function update(dt) {
 }
 
 function drawGrid() {
-  const s = 40;
+  const s = METER; // 1 tile = 1m = 55px
   ctx.save();
   ctx.globalAlpha = 0.15;
   ctx.strokeStyle = '#c7cbde';
@@ -318,7 +322,7 @@ function draw() {
   }
 
   // HUD
-  hud.textContent = `Right-click to move / Survival: ${state.time.toFixed(1)}s / Hits: ${state.hits}`;
+  hud.textContent = `Right-click to move | Speed: ${PLAYER_SPEED_MPS.toFixed(1)} m/s | Survival: ${state.time.toFixed(1)}s | Hits: ${state.hits}`;
 }
 
 function loop(now) {
@@ -337,14 +341,14 @@ function loop(now) {
 (async function boot() {
   try {
     // Load sprite relative to document
-    tiaImage = await loadImage('touka_tia.png');
+    tiaImage = await loadImage('img/touka_tia.png');
   } catch (e) {
     console.warn('Failed to load sprite, using fallback circle', e);
   }
   overlay.classList.add('show');
   ovTitle.textContent = 'Dodgetia';
   ovDesc.textContent = 'Right-click to set destination and dodge bullets.';
+  ovScore.textContent = `Units: 1m = ${METER}px | Speed: ${PLAYER_SPEED_MPS.toFixed(1)} m/s`;
   ovBtn.textContent = 'Start';
   requestAnimationFrame(loop);
 })();
-
