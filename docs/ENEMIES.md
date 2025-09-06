@@ -58,6 +58,23 @@ Counters
 - Projectile: square 0.6m side, speed 18 m/s, max range 10m (Danger)
 - Aftercast: 0.1s wait, then disappears
 
+## Katja (v0.2.1)
+
+- Units: 1m = 55px (fixed)
+- Movement: 3.85 m/s
+- Skills: Q and R, each once, then leaves
+
+### Skill Q (Danger)
+- Telegraph: 0.25s with preview
+- Projectile: square 1.2m side, speed 26 m/s, max range 11m
+- Aftercast: 0.1s wait
+
+### Skill R (Danger)
+- Range: 23m
+- Area: trapezoid forward (near width 3m, far width 6m, height 5m)
+- Telegraph: 0.8s with preview
+- Aftercast: 0.3s wait
+
 ## Options
 
 - In the start overlay, select which enemies can spawn (Hisui, Abigail). Unchecked enemies will not appear.

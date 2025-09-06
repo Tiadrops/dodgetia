@@ -47,6 +47,7 @@ let tiaImage;
 let hisuiImage;
 let abigailImage;
 let lukuImage;
+let katjaImage;
 
 // Units: 1m = 55px (fixed)
 const METER = 55;
@@ -129,14 +130,26 @@ function makeLuku() {
   });
 }
 
+function makeKatja() {
+  return Enemies.Katja({
+    METER,
+    player,
+    bounds: { w: VIEW_W, h: VIEW_H },
+    onDanger: () => { state.dangerHits += 1; gameOver(); },
+    sprite: katjaImage,
+  });
+}
+
 function allowedEnemyTypes() {
   const hisuiEl = document.getElementById('opt-hisui');
   const abelEl = document.getElementById('opt-abigail');
   const lukuEl = document.getElementById('opt-luku');
+  const katjaEl = document.getElementById('opt-katja');
   const allowed = [];
   if (!hisuiEl || hisuiEl.checked) allowed.push('Hisui');
   if (!abelEl || abelEl.checked) allowed.push('Abigail');
   if (!lukuEl || lukuEl.checked) allowed.push('Luku');
+  if (!katjaEl || katjaEl.checked) allowed.push('Katja');
   if (allowed.length === 0) return ['Hisui','Abigail'];
   return allowed;
 }
@@ -151,6 +164,7 @@ function makeRandomEnemyAllowed() {
   const t = types[Math.floor(Math.random() * types.length)];
   if (t === 'Abigail') return makeAbigail();
   if (t === 'Luku') return makeLuku();
+  if (t === 'Katja') return makeKatja();
   return makeHisui();
 }
 
@@ -373,6 +387,9 @@ function loop(now) {
       // Fallback to Luke.png if provided under that name
       try { lukuImage = await loadImage('img/Luke.png'); } catch (__) {}
     }
+    try {
+      katjaImage = await loadImage('img/Katja.png');
+    } catch (___) {}
   } catch (e) {
     console.warn('Failed to load sprite, using fallback circle', e);
   }
