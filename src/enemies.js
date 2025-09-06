@@ -541,7 +541,13 @@
         }
         case 'move': {
           steerTowardsPlayer(dt);
-          if (inRangeForW()) startW();
+          if (inRangeForW()) { e.w_feint = Math.random() * 0.2; e.state = 'W_feint'; e.t = 0; }
+          break;
+        }
+        case 'W_feint': {
+          steerTowardsPlayer(dt);
+          e.w_feint -= dt;
+          if (e.w_feint <= 0) startW();
           break;
         }
         case 'W_cast': {
@@ -898,6 +904,7 @@
           if (e.q_feint <= 0) startQ();
           break;
         }
+        
         case 'Q_cast': {
           if (e.t >= Q_CAST) { fireQ(); e.state = 'Q_fly'; e.t = 0; }
           break;
@@ -1125,6 +1132,257 @@
         ctx.fillStyle = e.color;
         ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI*2); ctx.fill();
         ctx.restore();
+      }
+    }
+
+    return { get dead(){ return e.dead; }, update, draw, _e: e };
+  };
+
+  // Vanya enemy factory
+  // cfg: { METER, player, bounds:{w,h}, onDanger: ()=>void, sprite?: HTMLImageElement }
+  Enemies.Vanya = function(cfg){
+    const M = cfg.METER;
+    const player = cfg.player;
+    const W = cfg.bounds.w, H = cfg.bounds.h;
+
+    const speedPx = 3.85 * M;
+    // Q projectile
+    const Q_CAST = 0.25;
+    const Q_OUT_RANGE = 7.5 * M;
+    const Q_OUT_SPEED = 10.6 * M;
+    const Q_BACK_SPEED = 11.0 * M;
+    const Q_R = 0.8 * M;
+    // E dash
+    const E_CAST = 0.3;
+    const E_WIDTH = 3.8 * M;
+    const E_DIST = 7.0 * M;
+    const E_SPEED = 11.2 * M;
+    const E_WAIT = 0.01;
+    // R telegraph-then-hit
+    const R_CAST = 0.26;
+    const R_T_DELAY = 1.0; // telegraph to hit delay
+    const R_H = 5.4 * M; // length along facing
+    const R_W_NEAR = 0.5 * M; // near width
+    const R_W_FAR = 6.7 * M; // far width
+
+    const e = {
+      name: 'Vanya', x: 0, y: 0, facing: 1, dead: false, r: 16,
+      color: '#22d3ee',
+      state: 'spawn_idle', t: 0,
+      // Q
+      q_ang: 0, qProj: null, vq_feint: 0,
+      // E
+      e_ang: 0, ex: 0, ey: 0, esx: 0, esy: 0, edist: 0, ve_feint: 0,
+      // R
+      r_ang: 0, r_ox: 0, r_oy: 0, r_center: 0, tele: [], vr_feint: 0, // queued telegraphs
+      // plan: use once in either Q>E>R or E>R>Q
+      queue: (Math.random() < 0.5) ? ['Q','E','R'] : ['E','R','Q'],
+      usedQ: false, usedE: false, usedR: false,
+      q_blockLast: false,
+    };
+
+    (function spawn(){
+      const pad = 40;
+      const side = Math.floor(Math.random() * 4);
+      if (side === 0) { e.x = pad; e.y = Math.random() * (H - pad*2) + pad; }
+      if (side === 1) { e.x = W - pad; e.y = Math.random() * (H - pad*2) + pad; }
+      if (side === 2) { e.x = Math.random() * (W - pad*2) + pad; e.y = pad; }
+      if (side === 3) { e.x = Math.random() * (W - pad*2) + pad; e.y = H - pad; }
+    })();
+
+    function steerTowardsPlayer(dt) {
+      const dx = player.x - e.x; const dy = player.y - e.y;
+      const d = Math.hypot(dx, dy) || 1;
+      const vx = (dx / d) * speedPx;
+      const vy = (dy / d) * speedPx;
+      e.x += vx * dt; e.y += vy * dt;
+      e.facing = (dx >= 0) ? 1 : -1;
+      e.x = Math.max(0, Math.min(W, e.x));
+      e.y = Math.max(0, Math.min(H, e.y));
+    }
+
+    // Q
+    function startQ() { e.state = 'Q_cast'; e.t = 0; e.q_ang = Math.atan2(player.y - e.y, player.x - e.x); }
+    function fireQ() {
+      const ang = e.q_ang; const vx = Math.cos(ang) * Q_OUT_SPEED; const vy = Math.sin(ang) * Q_OUT_SPEED;
+      e.qProj = { x: e.x, y: e.y, vx, vy, phase: 'out', sx: e.x, sy: e.y };
+      // move out of cast state to avoid refiring
+      e.state = 'Q_fly'; e.t = 0;
+      // If Q is the last skill in the queue, delay completion until projectile finishes
+      e.q_blockLast = (e.queue.length <= 1);
+      if (!e.q_blockLast) {
+        // allow next action immediately
+        e.usedQ = true; afterSkill();
+      }
+    }
+    function updateQ(dt) {
+      const p = e.qProj; if (!p) return;
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      // collision
+      const dx = player.x - p.x, dy = player.y - p.y; const rr = (player.radius + Q_R);
+      if (dx*dx + dy*dy <= rr*rr) {
+        cfg.onDanger && cfg.onDanger();
+        e.qProj = null;
+        if (e.q_blockLast) { e.q_blockLast = false; e.usedQ = true; afterSkill(); }
+        return;
+      }
+      const traveled = Math.hypot(p.x - p.sx, p.y - p.sy);
+      if (p.phase === 'out' && traveled >= Q_OUT_RANGE) {
+        // reverse towards current Vanya position
+        const bx = e.x - p.x, by = e.y - p.y; const d = Math.hypot(bx, by) || 1;
+        p.vx = (bx / d) * Q_BACK_SPEED; p.vy = (by / d) * Q_BACK_SPEED;
+        p.phase = 'back'; p.sx = p.x; p.sy = p.y;
+      } else if (p.phase === 'back' && traveled >= Q_OUT_RANGE) {
+        e.qProj = null; // done
+        if (e.q_blockLast) { e.q_blockLast = false; e.usedQ = true; afterSkill(); }
+      }
+    }
+
+    // E
+    function startE() {
+      e.state = 'E_cast'; e.t = 0; e.e_ang = Math.atan2(player.y - e.y, player.x - e.x);
+      const ux = Math.cos(e.e_ang), uy = Math.sin(e.e_ang);
+      e.esx = e.x; e.esy = e.y; e.ex = e.x + ux * E_DIST; e.ey = e.y + uy * E_DIST; e.edist = 0;
+    }
+    function updateEDash(dt) {
+      const ux = Math.cos(e.e_ang), uy = Math.sin(e.e_ang);
+      const step = E_SPEED * dt; const remain = E_DIST - e.edist; const move = Math.min(step, remain);
+      e.x += ux * move; e.y += uy * move; e.edist += move; e.facing = (ux >= 0) ? 1 : -1;
+      // hit as swept width
+      // Project player onto dash axis from es -> current position
+      const dx = player.x - e.esx, dy = player.y - e.esy;
+      const proj = dx * ux + dy * uy;
+      const perp = Math.abs(-dx * uy + dy * ux);
+      if (proj >= 0 && proj <= e.edist && perp <= (E_WIDTH * 0.5 + player.radius)) {
+        cfg.onDanger && cfg.onDanger();
+      }
+    }
+
+    // R
+    function startR() {
+      e.state = 'R_cast'; e.t = 0; e.r_ang = Math.atan2(player.y - e.y, player.x - e.x); e.r_ox = e.x; e.r_oy = e.y;
+    }
+    function spawnRTelegraph() {
+      // R uses two rectangles anchored at Vanya center, aligned to facing
+      e.tele.push({ ang: e.r_ang, ox: e.r_ox, oy: e.r_oy, t: 0, fired: false });
+    }
+    function updateTelegraphs(dt) {
+      for (const t of e.tele) {
+        t.t += dt;
+        if (!t.fired && t.t >= R_T_DELAY) {
+          // Apply front and back rectangles
+          const hitFront = circleIntersectsRotRect(
+            player.x, player.y, player.radius,
+            t.ox, t.oy,
+            6.7 * M, 5.4 * M,
+            t.ang
+          );
+          const hitBack = circleIntersectsRotRect(
+            player.x, player.y, player.radius,
+            t.ox, t.oy,
+            0.5 * M, 5.4 * M,
+            t.ang + Math.PI
+          );
+          if (hitFront || hitBack) cfg.onDanger && cfg.onDanger();
+          t.fired = true;
+        }
+      }
+      // clear old fired telegraphs shortly after
+      e.tele = e.tele.filter(t => t.t < R_T_DELAY + 0.2);
+    }
+
+    function afterSkill() {
+      e.queue.shift();
+      if (e.queue.length === 0) { e.dead = true; return; }
+      e.state = 'move'; e.t = 0;
+    }
+
+    function update(dt) {
+      if (e.dead) return;
+      e.t += dt;
+      // always update non-blocking effects
+      if (e.qProj) updateQ(dt);
+      if (e.tele.length) updateTelegraphs(dt);
+
+      switch (e.state) {
+        case 'spawn_idle': { if (e.t >= 1.0) { e.state = 'move'; e.t = 0; } break; }
+        case 'move': {
+          steerTowardsPlayer(dt);
+          const next = e.queue[0];
+          if (next === 'Q') { e.vq_feint = Math.random() * 0.5; e.state = 'Q_feint'; e.t = 0; }
+          else if (next === 'E') { e.ve_feint = Math.random() * 0.5; e.state = 'E_feint'; e.t = 0; }
+          else if (next === 'R') { e.vr_feint = Math.random() * 0.5; e.state = 'R_feint'; e.t = 0; }
+          break;
+        }
+        case 'Q_feint': { steerTowardsPlayer(dt); e.vq_feint -= dt; if (e.vq_feint <= 0) startQ(); break; }
+        case 'E_feint': { steerTowardsPlayer(dt); e.ve_feint -= dt; if (e.ve_feint <= 0) startE(); break; }
+        case 'R_feint': { steerTowardsPlayer(dt); e.vr_feint -= dt; if (e.vr_feint <= 0) startR(); break; }
+        case 'Q_cast': { if (e.t >= Q_CAST) { fireQ(); } break; }
+        case 'E_cast': { if (e.t >= E_CAST) { e.state = 'E_dash'; e.t = 0; } break; }
+        case 'E_dash': {
+          updateEDash(dt);
+          if (e.edist >= E_DIST) { e.state = 'E_wait'; e.t = 0; }
+          break;
+        }
+        case 'E_wait': { if (e.t >= E_WAIT) { e.usedE = true; afterSkill(); } break; }
+        case 'R_cast': {
+          // no telegraph during cast, but show a simple ring effect (draw stage)
+          if (e.t >= R_CAST) {
+            spawnRTelegraph();
+            e.usedR = true;
+            afterSkill(); // free to act; damage resolves later from telegraph
+          }
+          break;
+        }
+      }
+    }
+
+    function draw(ctx) {
+      if (e.dead) return;
+
+      // Q projectile
+      if (e.qProj) {
+        const p = e.qProj; ctx.save(); ctx.fillStyle = 'rgba(239,68,68,0.9)'; ctx.beginPath(); ctx.arc(p.x, p.y, Q_R, 0, Math.PI*2); ctx.fill(); ctx.restore();
+      }
+
+      // E telegraph during cast
+      if (e.state === 'E_cast') {
+        const ca = Math.cos(e.e_ang), sa = Math.sin(e.e_ang);
+        const ux = ca, uy = sa; const px = -sa, py = ca; const hw = E_WIDTH * 0.5;
+        const sx = e.x, sy = e.y; const ex = e.ex, ey = e.ey;
+        const verts = [ [sx+px*hw,sy+py*hw], [sx-px*hw,sy-py*hw], [ex-px*hw,ey-py*hw], [ex+px*hw,ey+py*hw] ];
+        ctx.save(); ctx.globalAlpha = 0.35; ctx.fillStyle = 'rgba(239,68,68,0.25)'; ctx.strokeStyle='rgba(239,68,68,0.9)'; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(verts[0][0],verts[0][1]); for(let i=1;i<verts.length;i++) ctx.lineTo(verts[i][0],verts[i][1]); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+      }
+
+      // R telegraphs: draw two rectangles (front and back)
+      for (const t of e.tele) {
+        ctx.save();
+        ctx.translate(t.ox, t.oy);
+        ctx.rotate(t.ang);
+        ctx.globalAlpha = 0.35; ctx.fillStyle='rgba(239,68,68,0.25)'; ctx.strokeStyle='rgba(239,68,68,0.9)'; ctx.lineWidth=2;
+        // front rectangle 0..6.7m
+        const fw = 5.4 * M; const fl = 6.7 * M;
+        ctx.beginPath(); ctx.rect(0, -fw/2, fl, fw); ctx.fill(); ctx.stroke();
+        // back rectangle 0..0.5m with reversed axis
+        const bw = 5.4 * M; const bl = 0.5 * M;
+        ctx.rotate(Math.PI);
+        ctx.beginPath(); ctx.rect(0, -bw/2, bl, bw); ctx.fill(); ctx.stroke();
+        ctx.restore();
+      }
+
+      // R cast effect (simple ring)
+      if (e.state === 'R_cast') {
+        ctx.save(); ctx.globalAlpha = 0.5; ctx.strokeStyle = 'rgba(59,130,246,0.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(e.x, e.y, 20, 0, Math.PI*2); ctx.stroke(); ctx.restore();
+      }
+
+      // Body (sprite or circle)
+      if (cfg.sprite) {
+        const iw = cfg.sprite.naturalWidth || cfg.sprite.width || 55; const ih = cfg.sprite.naturalHeight || cfg.sprite.height || 73; const scale = 1.3;
+        const dw = iw * scale, dh = ih * scale; const dx = Math.round(e.x - dw/2); const dy = Math.round(e.y - dh + 10);
+        ctx.save(); if (e.facing < 0) { ctx.translate(Math.round(e.x), 0); ctx.scale(-1,1); ctx.drawImage(cfg.sprite, Math.round(-dw/2), dy, dw, dh); } else { ctx.drawImage(cfg.sprite, dx, dy, dw, dh); } ctx.restore();
+      } else {
+        ctx.save(); ctx.fillStyle = e.color; ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI*2); ctx.fill(); ctx.restore();
       }
     }
 

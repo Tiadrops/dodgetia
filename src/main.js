@@ -14,7 +14,7 @@ const VIEW_W = 960;
 const VIEW_H = 540;
 
 // Version (provided by user)
-const VERSION = '0.2.2';
+const VERSION = '0.2.3';
 
 // HiDPI scaling to keep crisp rendering
 function setupHiDPI() {
@@ -49,6 +49,7 @@ let abigailImage;
 let lukuImage;
 let katjaImage;
 let darkoImage;
+let vanyaImage;
 
 // Units: 1m = 55px (fixed)
 const METER = 55;
@@ -151,19 +152,31 @@ function makeDarko() {
   });
 }
 
+function makeVanya() {
+  return Enemies.Vanya({
+    METER,
+    player,
+    bounds: { w: VIEW_W, h: VIEW_H },
+    onDanger: () => { state.dangerHits += 1; gameOver(); },
+    sprite: vanyaImage,
+  });
+}
+
 function allowedEnemyTypes() {
   const hisuiEl = document.getElementById('opt-hisui');
   const abelEl = document.getElementById('opt-abigail');
   const lukuEl = document.getElementById('opt-luku');
   const katjaEl = document.getElementById('opt-katja');
   const darkoEl = document.getElementById('opt-darko');
+  const vanyaEl = document.getElementById('opt-vanya');
   const allowed = [];
   if (!hisuiEl || hisuiEl.checked) allowed.push('Hisui');
   if (!abelEl || abelEl.checked) allowed.push('Abigail');
   if (!lukuEl || lukuEl.checked) allowed.push('Luku');
   if (!katjaEl || katjaEl.checked) allowed.push('Katja');
   if (!darkoEl || darkoEl.checked) allowed.push('Darko');
-  if (allowed.length === 0) return ['Hisui','Abigail','Luku','Katja','Darko'];
+  if (!vanyaEl || vanyaEl.checked) allowed.push('Vanya');
+  if (allowed.length === 0) return ['Hisui','Abigail','Luku','Katja','Darko','Vanya'];
   return allowed;
 }
 
@@ -179,6 +192,7 @@ function makeRandomEnemyAllowed() {
   if (t === 'Luku') return makeLuku();
   if (t === 'Katja') return makeKatja();
   if (t === 'Darko') return makeDarko();
+  if (t === 'Vanya') return makeVanya();
   return makeHisui();
 }
 
@@ -407,6 +421,9 @@ function loop(now) {
     try {
       darkoImage = await loadImage('img/darko.png');
     } catch (____) {}
+    try {
+      vanyaImage = await loadImage('img/Vanya.png');
+    } catch (_____) {}
   } catch (e) {
     console.warn('Failed to load sprite, using fallback circle', e);
   }

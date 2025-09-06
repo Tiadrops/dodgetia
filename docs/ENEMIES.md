@@ -12,7 +12,7 @@ Current mapping
 Counters
 - HUD shows Danger count and Caution count (x/3)
 
-## Hisui (v0.2.2)
+## Hisui (v0.2.3)
 
 - Units: 1m = 55px (fixed)
 - Movement: 4.11 m/s chasing the player
@@ -36,7 +36,7 @@ Counters
 - Wait: 0.25s
 - Judgment: Semicircle = Caution (yellow), Rectangle = Danger (red)
 
-## Abigail (v0.2.2)
+## Abigail (v0.2.3)
 
 - Units: 1m = 55px (fixed)
 - Movement: ~3.9 m/s chasing the player
@@ -47,7 +47,7 @@ Counters
 - Hit: Forward cone, radius 5.75m, angle 60° (Danger)
 - Aftercast: 0.1s wait, then disappears
 
-## Luku (v0.2.2)
+## Luku (v0.2.3)
 
 - Units: 1m = 55px (fixed)
 - Movement: 3.9 m/s chasing
@@ -58,7 +58,7 @@ Counters
 - Projectile: square 0.6m side, speed 18 m/s, max range 10m (Danger)
 - Aftercast: 0.1s wait, then disappears
 
-## Katja (v0.2.2)
+## Katja (v0.2.3)
 
 - Units: 1m = 55px (fixed)
 - Movement: 3.85 m/s
@@ -83,3 +83,24 @@ Counters
 ### Notes
 - Facing: Snapshot of player-facing at skill start is used for hit shapes
 - Respawn: Main loop respawns a new Hisui 1s after departure while game is running
+-## Vanya (v0.2.3)
+
+- Units: 1m = 55px (fixed)
+- Movement: 3.85 m/s
+- Skills: Q, E, R — uses each once (Q/R allow acting while effect pending)
+
+### Skill Q (Danger)
+- Cast: 0.25s, no preview
+- Projectile: circle r=0.8m, speed 10.6 m/s, out-and-back
+- Path: Outbound 7.5m → reverse toward Vanya at 11 m/s for 7.5m → disappears
+- Vanya can act immediately after launching; hit anytime causes Danger
+
+### Skill E (Danger)
+- Cast: 0.3s with preview (rectangle width 3.8m along a 7m dash path)
+- Dash: 7m at 11.2 m/s; during dash, width 3.8m swept area deals Danger
+- Aftercast: 0.01s then continues
+
+### Skill R (Danger)
+- Cast: 0.26s, no preview but small cast effect
+- Telegraph: Trapezoid (near 0.5m, far 6.7m, length 5.4m) appears; 1.0s later it deals Damage
+- Vanya can act while telegraph is pending
