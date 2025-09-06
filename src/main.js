@@ -14,7 +14,7 @@ const VIEW_W = 960;
 const VIEW_H = 540;
 
 // Version (provided by user)
-const VERSION = '0.10';
+const VERSION = '0.20';
 
 // HiDPI scaling to keep crisp rendering
 function setupHiDPI() {
@@ -45,6 +45,7 @@ const SPRITE_H = 73;
 const SPRITE_FRAMES = 8;
 let tiaImage;
 let hisuiImage;
+let abigailImage;
 
 // Units: 1m = 55px (fixed)
 const METER = 55;
@@ -98,14 +99,49 @@ function makeHisui() {
     player,
     bounds: { w: VIEW_W, h: VIEW_H },
     onDanger: () => { state.dangerHits += 1; gameOver(); },
-    onCaution: () => { state.cautionHits += 1; if (state.cautionHits >= 3) gameOver(); },
+    onCaution: () => {
+      if (ignoreCautionSelected()) return;
+      state.cautionHits += 1;
+      if (state.cautionHits >= 3) gameOver();
+    },
     sprite: hisuiImage,
   });
 }
 
+function makeAbigail() {
+  return Enemies.Abigail({
+    METER,
+    player,
+    bounds: { w: VIEW_W, h: VIEW_H },
+    onDanger: () => { state.dangerHits += 1; gameOver(); },
+    sprite: abigailImage,
+  });
+}
+
+function allowedEnemyTypes() {
+  const hisuiEl = document.getElementById('opt-hisui');
+  const abelEl = document.getElementById('opt-abigail');
+  const allowed = [];
+  if (!hisuiEl || hisuiEl.checked) allowed.push('Hisui');
+  if (!abelEl || abelEl.checked) allowed.push('Abigail');
+  if (allowed.length === 0) return ['Hisui','Abigail'];
+  return allowed;
+}
+
+function ignoreCautionSelected() {
+  const el = document.getElementById('opt-ignore-caution');
+  return !!(el && el.checked);
+}
+
+function makeRandomEnemyAllowed() {
+  const types = allowedEnemyTypes();
+  const t = types[Math.floor(Math.random() * types.length)];
+  return t === 'Abigail' ? makeAbigail() : makeHisui();
+}
+
 function spawnEnemies() {
   state.enemies.length = 0;
-  state.enemies.push(makeHisui());
+  state.enemies.push(makeRandomEnemyAllowed());
 }
 
 function fireFromEnemy(enemy) {
@@ -230,7 +266,7 @@ function update(dt) {
       setTimeout(() => {
         if (state.running && !state.gameOver && token === state.spawnToken) {
           // ensure only one enemy at a time
-          if (state.enemies.length === 0) state.enemies.push(makeHisui());
+          if (state.enemies.length === 0) state.enemies.push(makeRandomEnemyAllowed());
         }
       }, 0);
     }
@@ -238,7 +274,7 @@ function update(dt) {
   state.enemies = state.enemies.filter(e => !e.dead);
   if (state.enemies.length === 0 && state.running && !state.gameOver) {
     // safety: keep exactly one enemy alive
-    state.enemies.push(makeHisui());
+    state.enemies.push(makeRandomEnemyAllowed());
   }
 
   // collisions handled inside enemies (e.g., A/B skills)
@@ -315,6 +351,7 @@ function loop(now) {
     // Load sprite relative to document
     tiaImage = await loadImage('img/touka_tia.png');
     hisuiImage = await loadImage('img/hisui_touka_55px.png');
+    abigailImage = await loadImage('img/abigail.png');
   } catch (e) {
     console.warn('Failed to load sprite, using fallback circle', e);
   }

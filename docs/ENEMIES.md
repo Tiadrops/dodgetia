@@ -12,7 +12,7 @@ Current mapping
 Counters
 - HUD shows Danger count and Caution count (x/3)
 
-## Hisui (v0.10)
+## Hisui (v0.20)
 
 - Units: 1m = 55px (fixed)
 - Movement: 4.11 m/s chasing the player
@@ -34,7 +34,23 @@ Counters
 - Cast1: 0.5s, then hit in a forward semicircle of radius 5.0m
 - Cast2: 0.625s, then hit in a forward rectangle 5.5m × 2.0m
 - Wait: 0.25s
- - Judgment: Semicircle = Caution (yellow), Rectangle = Danger (red)
+- Judgment: Semicircle = Caution (yellow), Rectangle = Danger (red)
+
+## Abigail (v0.20)
+
+- Units: 1m = 55px (fixed)
+- Movement: ~3.9 m/s chasing the player
+- Skills: Only W, then leaves
+
+### Skill W
+- Telegraph: 0.35s (immobile) with preview
+- Hit: Forward cone, radius 5.75m, angle 60° (Danger)
+- Aftercast: 0.1s wait, then disappears
+
+## Options
+
+- In the start overlay, select which enemies can spawn (Hisui, Abigail). Unchecked enemies will not appear.
+ - Option: Ignore Caution hits (yellow). When enabled, Caution hits are not counted and do not lead to game over.
 
 ### Notes
 - Facing: Snapshot of player-facing at skill start is used for hit shapes
