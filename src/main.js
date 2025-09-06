@@ -13,6 +13,9 @@ const ovDesc = document.getElementById('ov-desc');
 const VIEW_W = 960;
 const VIEW_H = 540;
 
+// Version (provided by user)
+const VERSION = '0.10';
+
 // HiDPI scaling to keep crisp rendering
 function setupHiDPI() {
   const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
@@ -41,6 +44,7 @@ const SPRITE_W = 55;
 const SPRITE_H = 73;
 const SPRITE_FRAMES = 8;
 let tiaImage;
+let hisuiImage;
 
 // Units: 1m = 55px (fixed)
 const METER = 55;
@@ -64,10 +68,12 @@ const state = {
   running: false,
   gameOver: false,
   time: 0,
-  hits: 0,
+  dangerHits: 0,
+  cautionHits: 0,
   enemies: [],
   bullets: [],
   difficulty: 1,
+  spawnToken: 0,
 };
 
 // Player
@@ -85,42 +91,21 @@ const player = {
   frameDur: 0.09,
 };
 
-// Enemy factory
-function createEnemy(x, y, opts = {}) {
-  return {
-    x, y,
-    radius: opts.radius ?? 16,
-    color: opts.color ?? '#d7525e',
-    fireCd: 0,
-    fireInt: opts.fireInt ?? 1.2, // seconds
-    burst: opts.burst ?? 1,
-    bulletSpeed: opts.bulletSpeed ?? 360,
-    spread: opts.spread ?? 0, // radians
-    aimAtPlayer: opts.aimAtPlayer ?? true,
-  };
+// Enemy spawner
+function makeHisui() {
+  return Enemies.Hisui({
+    METER,
+    player,
+    bounds: { w: VIEW_W, h: VIEW_H },
+    onDanger: () => { state.dangerHits += 1; gameOver(); },
+    onCaution: () => { state.cautionHits += 1; if (state.cautionHits >= 3) gameOver(); },
+    sprite: hisuiImage,
+  });
 }
 
-function spawnEnemies(n = 4) {
+function spawnEnemies() {
   state.enemies.length = 0;
-  const pad = 40;
-  for (let i = 0; i < n; i++) {
-    // spawn at edges
-    const side = i % 4;
-    let x = 0, y = 0;
-    if (side === 0) { x = pad; y = Math.random() * (VIEW_H - pad*2) + pad; }
-    if (side === 1) { x = VIEW_W - pad; y = Math.random() * (VIEW_H - pad*2) + pad; }
-    if (side === 2) { x = Math.random() * (VIEW_W - pad*2) + pad; y = pad; }
-    if (side === 3) { x = Math.random() * (VIEW_W - pad*2) + pad; y = VIEW_H - pad; }
-
-    const e = createEnemy(x, y, {
-      fireInt: 1.3 - Math.min(0.8, 0.1 * state.difficulty),
-      burst: 1 + Math.floor(Math.random() * clamp(state.difficulty, 1, 5)),
-      spread: 0.25,
-      bulletSpeed: 330 + state.difficulty * 10,
-      color: ['#d7525e', '#e39a3b', '#5aa7e6'][i % 3],
-    });
-    state.enemies.push(e);
-  }
+  state.enemies.push(makeHisui());
 }
 
 function fireFromEnemy(enemy) {
@@ -145,7 +130,8 @@ function fireFromEnemy(enemy) {
 }
 
 // Input: right-click to move
-canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+// Disable context menu globally to avoid Back/Forward menu popping up
+document.addEventListener('contextmenu', (e) => e.preventDefault());
 canvas.addEventListener('mousedown', (e) => {
   if (e.button === 2) {
     e.preventDefault();
@@ -166,15 +152,17 @@ ovBtn.addEventListener('click', () => {
 function startGame() {
   state.running = true;
   state.gameOver = false;
+  state.spawnToken++;
   state.time = 0;
-  state.hits = 0;
+  state.dangerHits = 0;
+  state.cautionHits = 0;
   state.bullets = [];
   state.difficulty = 1;
   player.x = VIEW_W / 2;
   player.y = VIEW_H / 2;
   player.moving = false;
   overlay.classList.remove('show');
-  spawnEnemies(4);
+  spawnEnemies();
 }
 
 function gameOver() {
@@ -182,7 +170,7 @@ function gameOver() {
   overlay.classList.add('show');
   ovTitle.textContent = 'Game Over';
   ovDesc.textContent = 'You got hit!';
-  ovScore.textContent = `Survival: ${state.time.toFixed(1)}s | Hits: ${state.hits} | Speed: ${PLAYER_SPEED_MPS.toFixed(1)} m/s`;
+  ovScore.textContent = `Survival: ${state.time.toFixed(1)}s | Danger: ${state.dangerHits} | Caution: ${state.cautionHits}/3 | Speed: ${PLAYER_SPEED_MPS.toFixed(1)} m/s`;
   ovBtn.textContent = 'Restart';
 }
 
@@ -233,34 +221,27 @@ function update(dt) {
     player.frameTime = 0;
   }
 
-  // enemies fire
+  // enemies update and schedule respawn
   for (const e of state.enemies) {
-    e.fireCd -= dt;
-    if (e.fireCd <= 0) {
-      fireFromEnemy(e);
-      e.fireCd = e.fireInt;
+    e.update(dt);
+    if (e.dead && !e._respawnScheduled) {
+      e._respawnScheduled = true;
+      const token = state.spawnToken;
+      setTimeout(() => {
+        if (state.running && !state.gameOver && token === state.spawnToken) {
+          // ensure only one enemy at a time
+          if (state.enemies.length === 0) state.enemies.push(makeHisui());
+        }
+      }, 0);
     }
   }
-
-  // bullets update
-  const W = VIEW_W, H = VIEW_H;
-  for (const b of state.bullets) {
-    b.x += b.vx * dt;
-    b.y += b.vy * dt;
-    b.life -= dt;
+  state.enemies = state.enemies.filter(e => !e.dead);
+  if (state.enemies.length === 0 && state.running && !state.gameOver) {
+    // safety: keep exactly one enemy alive
+    state.enemies.push(makeHisui());
   }
-  // cull
-  state.bullets = state.bullets.filter(b => b.life > 0 && b.x > -30 && b.x < W + 30 && b.y > -30 && b.y < H + 30);
 
-  // collisions
-  for (const b of state.bullets) {
-    const r = b.radius + player.radius - 2;
-    if (dist2(b.x, b.y, player.x, player.y) <= r*r) {
-      state.hits += 1;
-      gameOver();
-      break;
-    }
-  }
+  // collisions handled inside enemies (e.g., A/B skills)
 }
 
 function drawGrid() {
@@ -284,17 +265,8 @@ function draw() {
   // ground grid
   drawGrid();
 
-  // enemies
-  for (const e of state.enemies) {
-    ctx.fillStyle = e.color;
-    ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, Math.PI*2); ctx.fill();
-  }
-
-  // bullets
-  for (const b of state.bullets) {
-    ctx.fillStyle = b.color;
-    ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); ctx.fill();
-  }
+  // enemies draw (handles telegraphs internally)
+  for (const e of state.enemies) e.draw(ctx);
 
   // player
   if (tiaImage) {
@@ -322,7 +294,7 @@ function draw() {
   }
 
   // HUD
-  hud.textContent = `Right-click to move | Speed: ${PLAYER_SPEED_MPS.toFixed(1)} m/s | Survival: ${state.time.toFixed(1)}s | Hits: ${state.hits}`;
+  hud.textContent = `v${VERSION} | Right-click to move | Speed: ${PLAYER_SPEED_MPS.toFixed(1)} m/s | Survival: ${state.time.toFixed(1)}s | Danger: ${state.dangerHits} | Caution: ${state.cautionHits}/3`;
 }
 
 function loop(now) {
@@ -342,11 +314,12 @@ function loop(now) {
   try {
     // Load sprite relative to document
     tiaImage = await loadImage('img/touka_tia.png');
+    hisuiImage = await loadImage('img/hisui_touka_55px.png');
   } catch (e) {
     console.warn('Failed to load sprite, using fallback circle', e);
   }
   overlay.classList.add('show');
-  ovTitle.textContent = 'Dodgetia';
+  ovTitle.textContent = `Dodgetia v${VERSION}`;
   ovDesc.textContent = 'Right-click to set destination and dodge bullets.';
   ovScore.textContent = `Units: 1m = ${METER}px | Speed: ${PLAYER_SPEED_MPS.toFixed(1)} m/s`;
   ovBtn.textContent = 'Start';
