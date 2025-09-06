@@ -788,7 +788,7 @@
       // Q
       q_ang: 0, proj: null, q_feint: 0,
       // R
-      r_ang: 0, r_ox: 0, r_oy: 0, r_offset: 0,
+      r_ang: 0, r_ox: 0, r_oy: 0, r_offset: 0, r_center: 0, r_jx: 0, r_jy: 0,
       // plan
       queue: Math.random() < 0.5 ? ['Q','R'] : ['R','Q'],
       usedQ: false, usedR: false,
@@ -833,6 +833,10 @@
       const proj = (dx * ca + dy * sa); // axis distance to player (signed, forward is +)
       // center distance along axis, clamp to keep trapezoid within [0, R_RANGE]
       e.r_center = Math.max(R_H * 0.5, Math.min(R_RANGE - R_H * 0.5, proj));
+      // add world-space jitter: +x/+y in [0, 0.5m]
+      const J = 1.0 * M;
+      e.r_jx = (Math.random() * 2 - 1) * J; // [-0.5m, +0.5m]
+      e.r_jy = (Math.random() * 2 - 1) * J; // [-0.5m, +0.5m]
     }
 
     function fireQ() {
@@ -854,11 +858,12 @@
       const ey = e.r_oy + uy * endD;
       const nH = R_W_NEAR * 0.5;
       const fH = R_W_FAR * 0.5;
+      const jx = e.r_jx || 0, jy = e.r_jy || 0;
       return [
-        [sx + px * nH, sy + py * nH], // near-left
-        [sx - px * nH, sy - py * nH], // near-right
-        [ex - px * fH, ey - py * fH], // far-right
-        [ex + px * fH, ey + py * fH], // far-left
+        [sx + px * nH + jx, sy + py * nH + jy], // near-left
+        [sx - px * nH + jx, sy - py * nH + jy], // near-right
+        [ex - px * fH + jx, ey - py * fH + jy], // far-right
+        [ex + px * fH + jx, ey + py * fH + jy], // far-left
       ];
     }
 
