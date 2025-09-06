@@ -12,7 +12,7 @@ Current mapping
 Counters
 - HUD shows Danger count and Caution count (x/3)
 
-## Hisui (v0.2.1)
+## Hisui (v0.2.2)
 
 - Units: 1m = 55px (fixed)
 - Movement: 4.11 m/s chasing the player
@@ -36,7 +36,7 @@ Counters
 - Wait: 0.25s
 - Judgment: Semicircle = Caution (yellow), Rectangle = Danger (red)
 
-## Abigail (v0.2.1)
+## Abigail (v0.2.2)
 
 - Units: 1m = 55px (fixed)
 - Movement: ~3.9 m/s chasing the player
@@ -47,7 +47,7 @@ Counters
 - Hit: Forward cone, radius 5.75m, angle 60° (Danger)
 - Aftercast: 0.1s wait, then disappears
 
-## Luku (v0.2.1)
+## Luku (v0.2.2)
 
 - Units: 1m = 55px (fixed)
 - Movement: 3.9 m/s chasing
@@ -58,7 +58,7 @@ Counters
 - Projectile: square 0.6m side, speed 18 m/s, max range 10m (Danger)
 - Aftercast: 0.1s wait, then disappears
 
-## Katja (v0.2.1)
+## Katja (v0.2.2)
 
 - Units: 1m = 55px (fixed)
 - Movement: 3.85 m/s
