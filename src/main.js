@@ -14,7 +14,7 @@ const VIEW_W = 960;
 const VIEW_H = 540;
 
 // Version (provided by user)
-const VERSION = '0.20';
+const VERSION = '0.2.1';
 
 // HiDPI scaling to keep crisp rendering
 function setupHiDPI() {
@@ -46,6 +46,7 @@ const SPRITE_FRAMES = 8;
 let tiaImage;
 let hisuiImage;
 let abigailImage;
+let lukuImage;
 
 // Units: 1m = 55px (fixed)
 const METER = 55;
@@ -118,12 +119,24 @@ function makeAbigail() {
   });
 }
 
+function makeLuku() {
+  return Enemies.Luku({
+    METER,
+    player,
+    bounds: { w: VIEW_W, h: VIEW_H },
+    onDanger: () => { state.dangerHits += 1; gameOver(); },
+    sprite: lukuImage,
+  });
+}
+
 function allowedEnemyTypes() {
   const hisuiEl = document.getElementById('opt-hisui');
   const abelEl = document.getElementById('opt-abigail');
+  const lukuEl = document.getElementById('opt-luku');
   const allowed = [];
   if (!hisuiEl || hisuiEl.checked) allowed.push('Hisui');
   if (!abelEl || abelEl.checked) allowed.push('Abigail');
+  if (!lukuEl || lukuEl.checked) allowed.push('Luku');
   if (allowed.length === 0) return ['Hisui','Abigail'];
   return allowed;
 }
@@ -136,7 +149,9 @@ function ignoreCautionSelected() {
 function makeRandomEnemyAllowed() {
   const types = allowedEnemyTypes();
   const t = types[Math.floor(Math.random() * types.length)];
-  return t === 'Abigail' ? makeAbigail() : makeHisui();
+  if (t === 'Abigail') return makeAbigail();
+  if (t === 'Luku') return makeLuku();
+  return makeHisui();
 }
 
 function spawnEnemies() {
@@ -352,6 +367,12 @@ function loop(now) {
     tiaImage = await loadImage('img/touka_tia.png');
     hisuiImage = await loadImage('img/hisui_touka_55px.png');
     abigailImage = await loadImage('img/abigail.png');
+    try {
+      lukuImage = await loadImage('img/Luku.png');
+    } catch (_) {
+      // Fallback to Luke.png if provided under that name
+      try { lukuImage = await loadImage('img/Luke.png'); } catch (__) {}
+    }
   } catch (e) {
     console.warn('Failed to load sprite, using fallback circle', e);
   }

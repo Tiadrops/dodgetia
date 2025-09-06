@@ -12,7 +12,7 @@ Current mapping
 Counters
 - HUD shows Danger count and Caution count (x/3)
 
-## Hisui (v0.20)
+## Hisui (v0.2.1)
 
 - Units: 1m = 55px (fixed)
 - Movement: 4.11 m/s chasing the player
@@ -36,7 +36,7 @@ Counters
 - Wait: 0.25s
 - Judgment: Semicircle = Caution (yellow), Rectangle = Danger (red)
 
-## Abigail (v0.20)
+## Abigail (v0.2.1)
 
 - Units: 1m = 55px (fixed)
 - Movement: ~3.9 m/s chasing the player
@@ -45,6 +45,17 @@ Counters
 ### Skill W
 - Telegraph: 0.35s (immobile) with preview
 - Hit: Forward cone, radius 5.75m, angle 60° (Danger)
+- Aftercast: 0.1s wait, then disappears
+
+## Luku (v0.2.1)
+
+- Units: 1m = 55px (fixed)
+- Movement: 3.9 m/s chasing
+- Skills: Only Q, then leaves
+
+### Skill Q
+- Telegraph: 0.3s (immobile)
+- Projectile: square 0.6m side, speed 18 m/s, max range 10m (Danger)
 - Aftercast: 0.1s wait, then disappears
 
 ## Options
