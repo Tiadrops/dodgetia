@@ -12,7 +12,7 @@ Current mapping
 Counters
 - HUD shows Danger count and Caution count (x/3)
 
-## Hisui (v0.2.3)
+## Hisui (v0.2.4)
 
 - Units: 1m = 55px (fixed)
 - Movement: 4.11 m/s chasing the player
@@ -36,7 +36,7 @@ Counters
 - Wait: 0.25s
 - Judgment: Semicircle = Caution (yellow), Rectangle = Danger (red)
 
-## Abigail (v0.2.3)
+## Abigail (v0.2.4)
 
 - Units: 1m = 55px (fixed)
 - Movement: ~3.9 m/s chasing the player
@@ -47,7 +47,7 @@ Counters
 - Hit: Forward cone, radius 5.75m, angle 60° (Danger)
 - Aftercast: 0.1s wait, then disappears
 
-## Luku (v0.2.3)
+## Luku (v0.2.4)
 
 - Units: 1m = 55px (fixed)
 - Movement: 3.9 m/s chasing
@@ -58,7 +58,7 @@ Counters
 - Projectile: square 0.6m side, speed 18 m/s, max range 10m (Danger)
 - Aftercast: 0.1s wait, then disappears
 
-## Katja (v0.2.3)
+## Katja (v0.2.4)
 
 - Units: 1m = 55px (fixed)
 - Movement: 3.85 m/s
@@ -83,7 +83,7 @@ Counters
 ### Notes
 - Facing: Snapshot of player-facing at skill start is used for hit shapes
 - Respawn: Main loop respawns a new Hisui 1s after departure while game is running
--## Vanya (v0.2.3)
+## Vanya (v0.2.4)
 
 - Units: 1m = 55px (fixed)
 - Movement: 3.85 m/s
@@ -104,3 +104,49 @@ Counters
 - Cast: 0.26s, no preview but small cast effect
 - Telegraph: Trapezoid (near 0.5m, far 6.7m, length 5.4m) appears; 1.0s later it deals Damage
 - Vanya can act while telegraph is pending
+
+## Debi & Marlene (v0.2.4)
+
+- States: Debi and Marlene (switch via E). Start state is random.
+- Order:
+- Start Debi: DQ → DE → MQ → ME → R
+- Start Marlene: MQ → ME → DQ → DE → R
+
+### Marlene Q (Caution + Debi dash)
+- Cast: 0.166s (no preview)
+- Projectile: circle r=0.5m, speed 20 m/s, range 6.25m (Caution)
+- If Debi is placed: Debi dashes with a 1.5m × 1.2m sweep for 4.5m over 0.30s (Danger); Debi marker is removed after
+
+### Marlene E (Danger)
+- Cast: 0.2s (no preview)
+- Self dash: 1.5m × 1.2m sweep for 4.5m over 0.30s
+- Places Marlene marker, switches to Debi, then moves-only for 0.5s
+
+### Debi Q (Caution)
+- Cast: 0.15s (no preview)
+- Front rectangle: 4.5m × 1.0m (Caution)
+- If Marlene is placed: Debi projectile r=0.8m, 18 m/s, 6m (Caution), then remove Marlene marker
+
+### Debi E (Danger)
+- Cast: 0.15s (no preview)
+- Projectile: r=0.8m, 18 m/s, 6m (Caution)
+- Places Debi marker, switches to Marlene, then moves-only for 0.5s
+
+### R (Danger)
+- Cast: 0.67s with preview → Rectangle 8m × 2m, then blink to opposite edge and wait 0.6s
+
+## Darko (v0.2.4)
+
+- Units: 1m = 55px (fixed)
+- Movement: 3.9 m/s
+- Skills: Only E, then leaves
+
+### Skill E (Danger)
+- Feint: 0.0–0.5s when within trigger range
+- Trigger range: 6.2m (from Darko to player)
+- Cast: 0.6s with preview (shows destination AoE at cast start)
+- Effect: Blinks/steps 4.0m forward toward the player and applies a circular AoE, radius 2.2m, at the arrival point (Danger)
+- Aftercast: 0.1s, then leaves
+
+Notes
+- On spawn: 1.0s idle before acting (no skills during this time)

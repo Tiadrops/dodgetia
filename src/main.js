@@ -14,7 +14,7 @@ const VIEW_W = 960;
 const VIEW_H = 540;
 
 // Version (provided by user)
-const VERSION = '0.2.3';
+const VERSION = '0.2.4';
 
 // HiDPI scaling to keep crisp rendering
 function setupHiDPI() {
@@ -50,6 +50,8 @@ let lukuImage;
 let katjaImage;
 let darkoImage;
 let vanyaImage;
+let debiImage;
+let marleneImage;
 
 // Units: 1m = 55px (fixed)
 const METER = 55;
@@ -162,6 +164,16 @@ function makeVanya() {
   });
 }
 
+function makeDebiMarlene() {
+  return Enemies.DebiMarlene({
+    METER,
+    player,
+    bounds: { w: VIEW_W, h: VIEW_H },
+    onDanger: () => { state.dangerHits += 1; gameOver(); },
+    sprites: { debi: debiImage, marlene: marleneImage },
+  });
+}
+
 function allowedEnemyTypes() {
   const hisuiEl = document.getElementById('opt-hisui');
   const abelEl = document.getElementById('opt-abigail');
@@ -169,6 +181,7 @@ function allowedEnemyTypes() {
   const katjaEl = document.getElementById('opt-katja');
   const darkoEl = document.getElementById('opt-darko');
   const vanyaEl = document.getElementById('opt-vanya');
+  const dmEl = document.getElementById('opt-debimarlene');
   const allowed = [];
   if (!hisuiEl || hisuiEl.checked) allowed.push('Hisui');
   if (!abelEl || abelEl.checked) allowed.push('Abigail');
@@ -176,6 +189,7 @@ function allowedEnemyTypes() {
   if (!katjaEl || katjaEl.checked) allowed.push('Katja');
   if (!darkoEl || darkoEl.checked) allowed.push('Darko');
   if (!vanyaEl || vanyaEl.checked) allowed.push('Vanya');
+  if (!dmEl || dmEl.checked) allowed.push('DebiMarlene');
   if (allowed.length === 0) return ['Hisui','Abigail','Luku','Katja','Darko','Vanya'];
   return allowed;
 }
@@ -193,6 +207,7 @@ function makeRandomEnemyAllowed() {
   if (t === 'Katja') return makeKatja();
   if (t === 'Darko') return makeDarko();
   if (t === 'Vanya') return makeVanya();
+  if (t === 'DebiMarlene') return makeDebiMarlene();
   return makeHisui();
 }
 
@@ -424,6 +439,8 @@ function loop(now) {
     try {
       vanyaImage = await loadImage('img/Vanya.png');
     } catch (_____) {}
+    try { debiImage = await loadImage('img/Debi.png'); } catch (______) {}
+    try { marleneImage = await loadImage('img/Marlene.png'); } catch (_______) {}
   } catch (e) {
     console.warn('Failed to load sprite, using fallback circle', e);
   }
