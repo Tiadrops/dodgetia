@@ -1285,6 +1285,7 @@
           );
           if (hitFront || hitBack) cfg.onDanger && cfg.onDanger();
           t.fired = true;
+          if (e.r_blockLast) { e.r_blockLast = false; afterSkill(); }
         }
       }
       // clear old fired telegraphs shortly after
@@ -1311,7 +1312,9 @@
           const next = e.queue[0];
           if (next === 'Q') { e.vq_feint = Math.random() * 0.5; e.state = 'Q_feint'; e.t = 0; }
           else if (next === 'E') { e.ve_feint = Math.random() * 0.5; e.state = 'E_feint'; e.t = 0; }
-          else if (next === 'R') { e.vr_feint = Math.random() * 0.5; e.state = 'R_feint'; e.t = 0; }
+          else if (next === 'R') {
+            if (!e.r_blockLast) { e.vr_feint = Math.random() * 0.5; e.state = 'R_feint'; e.t = 0; }
+          }
           break;
         }
         case 'Q_feint': { steerTowardsPlayer(dt); e.vq_feint -= dt; if (e.vq_feint <= 0) startQ(); break; }
@@ -1330,7 +1333,13 @@
           if (e.t >= R_CAST) {
             spawnRTelegraph();
             e.usedR = true;
-            afterSkill(); // free to act; damage resolves later from telegraph
+            if (e.queue.length <= 1) {
+              e.r_blockLast = true;
+              e.state = 'move';
+              e.t = 0;
+            } else {
+              afterSkill(); // free to act; damage resolves later from telegraph
+            }
           }
           break;
         }
