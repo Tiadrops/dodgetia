@@ -8,6 +8,7 @@ const ovBtn = document.getElementById('ov-btn');
 const ovScore = document.getElementById('ov-score');
 const ovTitle = document.getElementById('ov-title');
 const ovDesc = document.getElementById('ov-desc');
+const uncheckBtn = document.getElementById('opt-uncheck-all');
 
 // View size in CSS pixels
 const VIEW_W = 960;
@@ -256,6 +257,19 @@ ovBtn.addEventListener('click', () => {
   if (!state.running) startGame();
   else if (state.gameOver) restartGame();
 });
+
+// Uncheck all enemy options at once
+if (uncheckBtn) {
+  uncheckBtn.addEventListener('click', () => {
+    const ids = [
+      'opt-hisui','opt-abigail','opt-luku','opt-katja','opt-darko','opt-vanya','opt-debimarlene'
+    ];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.checked = false;
+    });
+  });
+}
 
 function startGame() {
   state.running = true;

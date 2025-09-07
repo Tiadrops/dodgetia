@@ -1479,6 +1479,28 @@
     // helpers
     function startCast(duration, next){ e.state = next; e.t = 0; e.castDur = duration; }
 
+    // distance helpers (player proximity triggers)
+    const TH6 = 6.0 * M; const TH6_2 = TH6 * TH6;
+    const TH55 = 5.5 * M; const TH55_2 = TH55 * TH55;
+    const TH45 = 4.5 * M; const TH45_2 = TH45 * TH45;
+    const THR = 8.0 * M; const THR_2 = THR * THR;
+    function near2(ax, ay, bx, by, r2){ const dx=ax-bx, dy=ay-by; return (dx*dx + dy*dy) <= r2; }
+    function inRangeDQ(){
+      // within 4.5m of enemy body OR 6m of placed Marlene (if any)
+      if (near2(player.x, player.y, e.x, e.y, TH45_2)) return true;
+      if (e.placedMarlene && near2(player.x, player.y, e.placedMarlene.x, e.placedMarlene.y, TH6_2)) return true;
+      return false;
+    }
+    function inRangeDE(){ return near2(player.x, player.y, e.x, e.y, TH6_2); }
+    function inRangeMQ(){
+      // within 5.5m of enemy or placed Debi (if any)
+      if (near2(player.x, player.y, e.x, e.y, TH55_2)) return true;
+      if (e.placedDebi && near2(player.x, player.y, e.placedDebi.x, e.placedDebi.y, TH55_2)) return true;
+      return false;
+    }
+    function inRangeME(){ return near2(player.x, player.y, e.x, e.y, TH55_2); }
+    function inRangeR(){ return near2(player.x, player.y, e.x, e.y, THR_2); }
+
     // skill drivers
     function startDQ(){ e.dq_ang = Math.atan2(player.y - e.y, player.x - e.x); startCast(Q_DEB_CAST,'DQ_cast'); }
     function startDE(){ startCast(E_DEB_CAST,'DE_cast'); }
@@ -1557,6 +1579,13 @@
       // place Debi and switch form to Marlene
       e.placedDebi = { x:e.x, y:e.y };
       e.form = 'Marlene';
+      // retreat 2m backwards after firing (away from shot direction)
+      const back = 2.0 * M;
+      e.x -= Math.cos(ang) * back;
+      e.y -= Math.sin(ang) * back;
+      // keep inside bounds
+      e.x = Math.max(0, Math.min(W, e.x));
+      e.y = Math.max(0, Math.min(H, e.y));
       e.postETime = 0.5; // move-only 0.5s after E
     }
     function applyMQ(){
@@ -1608,11 +1637,11 @@
           if (e.dashes && e.dashes.some(d => d.follow)) { steerTowardsPlayer(dt); break; }
           steerTowardsPlayer(dt);
           const next = e.queue[0];
-          if (next==='DQ') { e.dq_feint = Math.random() * 0.5; e.state='DQ_feint'; e.t=0; }
-          else if (next==='DE') { e.de_feint = Math.random() * 0.5; e.state='DE_feint'; e.t=0; }
-          else if (next==='MQ') { e.mq_feint = Math.random() * 0.5; e.state='MQ_feint'; e.t=0; }
-          else if (next==='ME') { e.me_feint = Math.random() * 0.5; e.state='ME_feint'; e.t=0; }
-          else if (next==='R')  { e.r_feint  = Math.random() * 0.5; e.state='R_feint';  e.t=0; }
+          if (next==='DQ' && inRangeDQ()) { e.dq_feint = Math.random() * 0.25; e.state='DQ_feint'; e.t=0; }
+          else if (next==='DE' && inRangeDE()) { e.de_feint = Math.random() * 0.25; e.state='DE_feint'; e.t=0; }
+          else if (next==='MQ' && inRangeMQ()) { e.mq_feint = Math.random() * 0.25; e.state='MQ_feint'; e.t=0; }
+          else if (next==='ME' && inRangeME()) { e.me_feint = Math.random() * 0.25; e.state='ME_feint'; e.t=0; }
+          else if (next==='R'  && inRangeR())  { e.r_feint  = Math.random() * 0.5; e.state='R_feint';  e.t=0; }
           break;
         }
         case 'DQ_feint': { steerTowardsPlayer(dt); e.dq_feint -= dt; if (e.dq_feint <= 0) startDQ(); break; }

@@ -43,14 +43,19 @@
 ## Debi & Marlene
 - Forms: Debi / Marlene (switch via E). Start form random.
 - Base order by start form; R is inserted at a random position: Debi start base [DQ, DE, MQ, ME], Marlene start base [MQ, ME, DQ, DE]
-- Feint: DQ/DE/MQ/ME/R = 0.0–0.5s
+- Feint duration: DQ/DE/MQ/ME = 0.0–0.25s, R = 0.0–0.5s
+- Feint trigger distance:
+  - DQ: body 4.5m / placed Marlene 6.0m
+  - DE: body 6.0m
+  - MQ: body 5.5m / placed Debi 5.5m
+  - ME: body 5.5m
+  - R: body 8.0m
 - Post-E: move-only 0.5s after DE/ME
-- DQ (Caution): Cast 0.15s; front rectangle 4.5m × 1.0m (Caution). If Marlene placed: fire Debi projectile (r=0.8m, 18 m/s, 6m, Caution), then remove Marlene marker
-- DE (Caution): Cast 0.15s; fire Debi projectile (r=0.8m, 18 m/s, 6m, Caution); place Debi marker; switch to Marlene
-- MQ (Caution + Debi dash): Cast 0.166s; fire Marlene projectile (r=0.5m, 20 m/s, 6.25m, Caution). If Debi placed: Debi dashes 4.5m over 0.30s (sweep 1.5m × 1.2m, Danger), then remove Debi marker
+- DQ (Caution): Cast 0.15s; front rectangle 4.5m × 1.0m (Caution). If Marlene placed: fire Debi projectile (r=0.8m, 18 m/s, 6m, Caution), then remove Marlene marker; post-wait 0.15s
+- DE (Caution): Cast 0.15s; fire Debi projectile (r=0.8m, 18 m/s, 6m, Caution); then retreat 2.0m backward; place Debi marker; switch to Marlene
+- MQ (Caution + Debi dash): Cast 0.166s; fire Marlene projectile (r=0.5m, 20 m/s, 6.25m, Caution). If Debi placed: Debi dashes 4.5m over 0.30s (sweep 1.5m × 1.2m, Danger), then remove Debi marker; post-wait 0.15s
 - ME (Danger, self dash): Cast 0.2s; self dash 4.5m over 0.30s (sweep 1.5m × 1.2m); place Marlene marker; switch to Debi
 - R (Danger, telegraph fixed): Cast 0.67s (preview rectangle 8m × 2m), then hit; blink to opposite edge (+8m), wait 0.6s; continues if skills remain
-- DQ/MQ Post-wait: +0.15s after applying each (before next skill)
 
 Notes
 - Colors: Danger = red, Caution = yellow (both telegraph and projectiles follow this)
