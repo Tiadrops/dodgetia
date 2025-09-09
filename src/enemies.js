@@ -1319,7 +1319,7 @@
           if (next === 'Q' && d2 <= VQ2) { e.vq_feint = Math.random() * 0.75; e.state = 'Q_feint'; e.t = 0; }
           else if (next === 'E' && d2 <= VE2) { e.ve_feint = Math.random() * 0.75; e.state = 'E_feint'; e.t = 0; }
           else if (next === 'R' && d2 <= VR2) {
-            if (!e.r_blockLast) { e.vr_feint = Math.random() * 0.5; e.state = 'R_feint'; e.t = 0; }
+            if (!e.r_blockLast) { e.vr_feint = Math.random() * 0.75; e.state = 'R_feint'; e.t = 0; }
           }
           break;
         }
