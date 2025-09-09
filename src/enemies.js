@@ -1165,6 +1165,11 @@
     const R_W_NEAR = 0.5 * M; // near width
     const R_W_FAR = 6.7 * M; // far width
 
+    // Feint trigger distance thresholds
+    const VQ = 8.3 * M; const VQ2 = VQ * VQ;
+    const VE = 7.0 * M; const VE2 = VE * VE;
+    const VR = 6.7 * M; const VR2 = VR * VR;
+
     const e = {
       name: 'Vanya', x: 0, y: 0, facing: 1, dead: false, r: 16,
       color: '#22d3ee',
@@ -1310,9 +1315,10 @@
         case 'move': {
           steerTowardsPlayer(dt);
           const next = e.queue[0];
-          if (next === 'Q') { e.vq_feint = Math.random() * 0.5; e.state = 'Q_feint'; e.t = 0; }
-          else if (next === 'E') { e.ve_feint = Math.random() * 0.5; e.state = 'E_feint'; e.t = 0; }
-          else if (next === 'R') {
+          const dxp = player.x - e.x; const dyp = player.y - e.y; const d2 = dxp*dxp + dyp*dyp;
+          if (next === 'Q' && d2 <= VQ2) { e.vq_feint = Math.random() * 0.75; e.state = 'Q_feint'; e.t = 0; }
+          else if (next === 'E' && d2 <= VE2) { e.ve_feint = Math.random() * 0.75; e.state = 'E_feint'; e.t = 0; }
+          else if (next === 'R' && d2 <= VR2) {
             if (!e.r_blockLast) { e.vr_feint = Math.random() * 0.5; e.state = 'R_feint'; e.t = 0; }
           }
           break;
@@ -1354,14 +1360,37 @@
         const p = e.qProj; ctx.save(); ctx.fillStyle = 'rgba(239,68,68,0.9)'; ctx.beginPath(); ctx.arc(p.x, p.y, Q_R, 0, Math.PI*2); ctx.fill(); ctx.restore();
       }
 
-      // E telegraph during cast
-      if (e.state === 'E_cast') {
+      // E telegraph: keep visible through cast -> dash -> short wait
+      if (e.state === 'E_cast' || e.state === 'E_dash' || e.state === 'E_wait') {
         const ca = Math.cos(e.e_ang), sa = Math.sin(e.e_ang);
         const ux = ca, uy = sa; const px = -sa, py = ca; const hw = E_WIDTH * 0.5;
-        const sx = e.x, sy = e.y; const ex = e.ex, ey = e.ey;
+        const sx = (e.esx ?? e.x), sy = (e.esy ?? e.y); const ex = e.ex, ey = e.ey;
+        // Draw full path preview (light)
         const verts = [ [sx+px*hw,sy+py*hw], [sx-px*hw,sy-py*hw], [ex-px*hw,ey-py*hw], [ex+px*hw,ey+py*hw] ];
-        ctx.save(); ctx.globalAlpha = 0.35; ctx.fillStyle = 'rgba(239,68,68,0.25)'; ctx.strokeStyle='rgba(239,68,68,0.9)'; ctx.lineWidth=2;
+        ctx.save();
+        ctx.globalAlpha = 0.35;
+        ctx.fillStyle = 'rgba(239,68,68,0.25)';
+        ctx.strokeStyle = 'rgba(239,68,68,0.9)';
+        ctx.lineWidth=2;
         ctx.beginPath(); ctx.moveTo(verts[0][0],verts[0][1]); for(let i=1;i<verts.length;i++) ctx.lineTo(verts[i][0],verts[i][1]); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+
+        // Overlay strong red only for the portion that is actually occurring (dash) or has occurred
+        let covered = 0;
+        if (e.state === 'E_dash') covered = Math.max(0, Math.min(E_DIST, e.edist || 0));
+        else if (e.state === 'E_wait') covered = E_DIST;
+        if (covered > 0) {
+          ctx.save();
+          ctx.translate(sx, sy);
+          ctx.rotate(Math.atan2(uy, ux));
+          ctx.globalAlpha = 0.5;
+          ctx.fillStyle = 'rgba(239,68,68,0.45)';
+          ctx.strokeStyle = 'rgba(239,68,68,1.0)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.rect(0, -hw, covered, E_WIDTH);
+          ctx.fill(); ctx.stroke();
+          ctx.restore();
+        }
       }
 
       // R telegraphs: draw two rectangles (front and back)

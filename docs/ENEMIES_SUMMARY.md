@@ -30,7 +30,7 @@
 
 ## Vanya
 - Move: 3.85 m/s
-- Feint: Q/E/R = 0.0–0.5s
+- Feint: Q/E/R = 0.0–0.75s
 - Feint trigger distance: Q 8.3m / E 7.0m / R 6.7m
 - Q (non-blocking): Cast 0.25s → circle r=0.8m, 10.6 m/s out 7.5m, then 11 m/s back 7.5m (Danger)
 - E: 0.3s telegraph (rect width 3.8m, length 7m path) → dash 7m at 11.2 m/s (Danger) → 0.01s wait
