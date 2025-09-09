@@ -1,4 +1,4 @@
-# Enemies Summary (v0.2.4)
+# Enemies Summary (v0.3.0)
 
 - Units: 1m = 55px (fixed)
 - Judgments: Danger = red (instant KO), Caution = yellow (3 hits to KO; can be ignored via option)
