@@ -1,6 +1,6 @@
 Dodgetia Handoff Notes
 
-Version: v0.3.3
+Version: v0.4.0
 
 Overview
 - Units: 1m = 55px (fixed). Player speed 3.9 m/s. Grid tile = 55px.
@@ -10,12 +10,15 @@ Overview
 Code Layout
 - index.html: Canvas, overlay UI, Enemy Options, scripts (classic scripts).
 - src/main.js: loop, input, HUD, spawner, images, VERSION.
-- src/enemies.js: monolithic enemies + shared helpers (still contains all except Vanya/Hisui/DebiMarlene are now provided by split files which override).
+- src/enemies.js: registry stub only（全敵は `src/enemies/*.js` に分離済み）
 - src/enemies/vanya.js: Vanya (Q/E/R) split, distance triggers Q 8.3m / E 7.0m / R 6.7m. Feint 0–0.75s. R two rectangles (front/back) fixed at cast.
 - src/enemies/hisui.js: Hisui split. Local utils included to avoid cross-file deps.
 - src/enemies/katja.js: Katja split. R is trapezoid (near 3m / far 6m / height 5m), center clamped within 0–23m with ±1.0m jitter, polygon hit.
+- src/enemies/luku.js: Luku split. Q: 0.3s cast → 0.6m square projectile at 18 m/s, range 10m, Danger; 0.1s aftercast → despawn.
+- src/enemies/abigail.js: Abigail split. W: 0.35s cast → 60° cone (radius 5.75m) Danger, 0.1s wait → despawn. Feint 0–0.2s.
 - src/enemies/debimarlene.js: Debi & Marlene split. Local utils included. See details below.
-- docs/ENEMIES.md, docs/ENEMIES_SUMMARY.md: specs and summary (both at v0.3.3).
+- src/enemies/darko.js: Darko split. E: 0.6s cast → blink 4m toward player → 2.2m radius Danger at destination → 0.1s wait.
+- docs/ENEMIES.md, docs/ENEMIES_SUMMARY.md: specs and summary (both at v0.4.0).
 
 Debi & Marlene (current spec highlights)
 - Feint: DQ/DE/MQ/ME = 0.0–0.25s. R = 0.0–0.5s.
@@ -36,6 +39,5 @@ Notes
 - Images used: touka_tia.png, hisui_touka_55px.png, abigail.png, Luku.png, Katja.png, darko.png, Vanya.png, Debi.png, Marlene.png.
 
 Next Steps (suggested)
-- Split remaining enemies: Katja, Darko, Luku, Abigail into src/enemies/<name>.js.
-- Optionally extract common geometry helpers into src/enemies/_utils.js and load before enemy files.
-- If desired, add quick in-game debug overlay to toggle per-enemy feint ranges/lengths.
+- Optional: 共通ジオメトリを各キャラにローカルで持たせる方針維持（影響分離）。
+- Optional: デバッグ用オーバーレイ（フェイント時間/距離の一時変更）。
