@@ -15,7 +15,7 @@ const VIEW_W = 960;
 const VIEW_H = 540;
 
 // Version (provided by user)
-const VERSION = '0.3.0';
+const VERSION = '0.3.1';
 
 // HiDPI scaling to keep crisp rendering
 function setupHiDPI() {
