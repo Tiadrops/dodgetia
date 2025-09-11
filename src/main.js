@@ -53,6 +53,7 @@ let darkoImage;
 let vanyaImage;
 let debiImage;
 let marleneImage;
+let hazeImage;
 
 // Units: 1m = 55px (fixed)
 const METER = 55;
@@ -175,6 +176,24 @@ function makeDebiMarlene() {
   });
 }
 
+function makeHaze() {
+  return Enemies.Haze({
+    METER,
+    player,
+    bounds: { w: VIEW_W, h: VIEW_H },
+    onDanger: () => { state.dangerHits += 1; gameOver(); },
+    onCaution: () => {
+      if (ignoreCautionSelected()) return;
+      state.cautionHits += 1;
+      if (state.cautionHits >= 3) gameOver();
+    },
+    sprite: hazeImage,
+    applySlow: (factor, duration) => {
+      if (typeof window.applyPlayerSlow === 'function') window.applyPlayerSlow(factor, duration);
+    },
+  });
+}
+
 function allowedEnemyTypes() {
   const hisuiEl = document.getElementById('opt-hisui');
   const abelEl = document.getElementById('opt-abigail');
@@ -183,6 +202,7 @@ function allowedEnemyTypes() {
   const darkoEl = document.getElementById('opt-darko');
   const vanyaEl = document.getElementById('opt-vanya');
   const dmEl = document.getElementById('opt-debimarlene');
+  const hazeEl = document.getElementById('opt-haze');
   const allowed = [];
   if (!hisuiEl || hisuiEl.checked) allowed.push('Hisui');
   if (!abelEl || abelEl.checked) allowed.push('Abigail');
@@ -191,6 +211,7 @@ function allowedEnemyTypes() {
   if (!darkoEl || darkoEl.checked) allowed.push('Darko');
   if (!vanyaEl || vanyaEl.checked) allowed.push('Vanya');
   if (!dmEl || dmEl.checked) allowed.push('DebiMarlene');
+  if (!hazeEl || hazeEl.checked) allowed.push('Haze');
   if (allowed.length === 0) return ['Hisui','Abigail','Luku','Katja','Darko','Vanya'];
   return allowed;
 }
@@ -209,6 +230,7 @@ function makeRandomEnemyAllowed() {
   if (t === 'Darko') return makeDarko();
   if (t === 'Vanya') return makeVanya();
   if (t === 'DebiMarlene') return makeDebiMarlene();
+  if (t === 'Haze') return makeHaze();
   return makeHisui();
 }
 
@@ -262,7 +284,7 @@ ovBtn.addEventListener('click', () => {
 if (uncheckBtn) {
   uncheckBtn.addEventListener('click', () => {
     const ids = [
-      'opt-hisui','opt-abigail','opt-luku','opt-katja','opt-darko','opt-vanya','opt-debimarlene'
+      'opt-hisui','opt-abigail','opt-luku','opt-katja','opt-darko','opt-vanya','opt-debimarlene','opt-haze'
     ];
     ids.forEach(id => {
       const el = document.getElementById(id);
@@ -312,6 +334,12 @@ function update(dt) {
     state.difficulty = 1 + Math.floor(state.time / 15);
   }
 
+  // slow effect timer
+  if (player.slowRemain && player.slowRemain > 0) {
+    player.slowRemain -= dt;
+    if (player.slowRemain <= 0) { player.slowRemain = 0; player.slowFactor = 1; }
+  }
+
   // player move
   if (player.moving && player.targetX != null && player.targetY != null) {
     const dx = player.targetX - player.x;
@@ -321,8 +349,9 @@ function update(dt) {
       player.moving = false;
     } else {
       const d = Math.sqrt(d2);
-      const vx = (dx / d) * player.speed;
-      const vy = (dy / d) * player.speed;
+      const eff = player.speed * (player.slowFactor || 1);
+      const vx = (dx / d) * eff;
+      const vy = (dy / d) * eff;
       player.x += vx * dt;
       player.y += vy * dt;
       if (Math.hypot(player.targetX - player.x, player.targetY - player.y) < 2) {
@@ -455,6 +484,7 @@ function loop(now) {
     } catch (_____) {}
     try { debiImage = await loadImage('img/Debi.png'); } catch (______) {}
     try { marleneImage = await loadImage('img/Marlene.png'); } catch (_______) {}
+    try { hazeImage = await loadImage('img/Haze.png'); } catch (________) {}
   } catch (e) {
     console.warn('Failed to load sprite, using fallback circle', e);
   }
@@ -465,3 +495,9 @@ function loop(now) {
   ovBtn.textContent = 'Start';
   requestAnimationFrame(loop);
 })();
+
+// Player slow utility (used by Haze RQ)
+window.applyPlayerSlow = function(factor, durationSec) {
+  player.slowFactor = factor;
+  player.slowRemain = Math.max(player.slowRemain || 0, durationSec);
+};
