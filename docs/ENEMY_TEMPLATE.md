@@ -1,4 +1,4 @@
-Enemy Template (v0.4.0)
+Enemy Template (v0.4.1)
 
 Purpose
 - 新しいエネミーを追加するための実装テンプレートと手順のまとめ。

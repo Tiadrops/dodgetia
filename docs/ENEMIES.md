@@ -12,7 +12,7 @@ Current mapping
 Counters
 - HUD shows Danger count and Caution count (x/3)
 
-## Hisui (v0.4.0)
+## Hisui (v0.4.1)
 
 - Units: 1m = 55px (fixed)
 - Movement: 4.11 m/s chasing the player
@@ -36,7 +36,7 @@ Counters
 - Wait: 0.25s
 - Judgment: Semicircle = Caution (yellow), Rectangle = Danger (red)
 
-## Abigail (v0.4.0)
+## Abigail (v0.4.1)
 
 - Units: 1m = 55px (fixed)
 - Movement: ~3.9 m/s chasing the player
@@ -47,7 +47,7 @@ Counters
 - Hit: Forward cone, radius 5.75m, angle 60° (Danger)
 - Aftercast: 0.1s wait, then disappears
 
-## Luku (v0.4.0)
+## Luku (v0.4.1)
 
 - Units: 1m = 55px (fixed)
 - Movement: 3.9 m/s chasing
@@ -58,7 +58,7 @@ Counters
 - Projectile: square 0.6m side, speed 18 m/s, max range 10m (Danger)
 - Aftercast: 0.1s wait, then disappears
 
-## Katja (v0.4.0)
+## Katja (v0.4.1)
 
 - Units: 1m = 55px (fixed)
 - Movement: 3.85 m/s
@@ -83,7 +83,7 @@ Counters
 ### Notes
 - Facing: Snapshot of player-facing at skill start is used for hit shapes
 - Respawn: Main loop respawns a new Hisui 1s after departure while game is running
-## Vanya (v0.4.0)
+## Vanya (v0.4.1)
 
 - Units: 1m = 55px (fixed)
 - Movement: 3.85 m/s
@@ -105,7 +105,7 @@ Counters
 - Telegraph: Trapezoid (near 0.5m, far 6.7m, length 5.4m) appears; 1.0s later it deals Damage
 - Vanya can act while telegraph is pending
 
-## Debi & Marlene (v0.4.0)
+## Debi & Marlene (v0.4.1)
 
 - States: Debi and Marlene (switch via E). Start state is random.
 - Order:
@@ -135,7 +135,7 @@ Counters
 ### R (Danger)
 - Cast: 0.67s with preview → Rectangle 8m × 2m, then blink to opposite edge and wait 0.6s
 
-## Darko (v0.4.0)
+## Darko (v0.4.1)
 
 - Units: 1m = 55px (fixed)
 - Movement: 3.9 m/s
