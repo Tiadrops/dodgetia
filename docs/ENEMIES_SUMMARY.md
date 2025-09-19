@@ -58,6 +58,14 @@
 - ME (Danger, self dash): Cast 0.2s; self dash 4.5m over 0.30s (sweep 1.5m × 1.2m); place Marlene marker; switch to Debi
 - R (Danger, telegraph fixed): Cast 0.67s (preview rectangle 8m × 2m), then hit; blink to opposite edge (+8m), wait 0.6s; continues if skills remain
 
+## Justyna
+- Move: 3.94 m/s; uses E (2.5m dash over 0.26s, 2.0s cooldown) to realign during Q casts
+- Debug mode: all skill hits are currently tagged as Caution (yellow) to simplify testing
+- W: Cast 0.4s; Caution circle radius 2.0m at a point up to 6.5m away (anchored in world)
+- Q1: Two Caution sweeps; each cast 0.4s for a rectangle 6.25m x 1.8m that follows her position while the angle is locked; unlocks Q2 for 3.0s but Q2 stays locked for 0.4s after Q1 completes; skipped if the window expires
+- Q2: Cast 0.7s; Caution rectangle 7.0m x 1.5m, only usable inside the Q1 window
+- R: Cast 0.5s then 8 Caution pulses every 0.125s in a circle radius 3.0m offset up to 6.0m; area follows her and movement is at 60% with other skills disabled
+
 Notes
 - Colors: Danger = red, Caution = yellow (both telegraph and projectiles follow this)
 - Markers: Debi/Marlene markers render with their sprites if available; they are explicitly removed by the skills that consume them

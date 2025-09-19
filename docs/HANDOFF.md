@@ -2,6 +2,12 @@ Dodgetia Handoff Notes
 
 Version: v0.4.1
 
+
+Current Focus (2025-09-20)
+- Debugging Justyna: all skill hits are marked as Caution (yellow) and telegraphs use caution colors until testing is done. Remember to revert to Danger values once QA is satisfied.
+- Key files for this debug pass: index.html (options checkbox), src/main.js (makeJustyna wiring), src/enemies/justyna.js (skill logic), docs/ENEMIES*.md (documented spec).
+- Per user request: always update this HANDOFF.md so future sessions can sync by reading it (they will be told simply "HANDOFF.mdを見て").
+
 Overview
 - Units: 1m = 55px (fixed). Player speed 3.9 m/s. Grid tile = 55px.
 - Hit rules: Danger (red) = instant end. Caution (yellow) = 3 hits end, optional ignore via overlay option.
@@ -35,6 +41,7 @@ Code Layout
 - src/enemies/abigail.js: Abigail split. W: 0.35s cast → 60° cone (radius 5.75m) Danger, 0.1s wait → despawn. Feint 0–0.2s.
 - src/enemies/debimarlene.js: Debi & Marlene split. Local utils included. See details below.
 - src/enemies/darko.js: Darko split. E: 0.6s cast → blink 4m toward player → 2.2m radius Danger at destination → 0.1s wait.
+- src/enemies/justyna.js: Justyna debug build (skills follow caster, R pulses follow position; hits currently Caution).
 - src/enemies/haze.js: Haze split. MS=3.98。Q/W/RQ を1回ずつ実行して退場（順序ランダム）。RQ弾に当たると1秒間プレイヤー速度0.7倍。
 - docs/ENEMIES.md, docs/ENEMIES_SUMMARY.md: specs and summary (both at v0.4.1).
 

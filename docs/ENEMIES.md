@@ -150,3 +150,35 @@ Counters
 
 Notes
 - On spawn: 1.0s idle before acting (no skills during this time)
+
+## Justyna (v0.4.2 debug)
+
+- Units: 1m = 55px (fixed)
+- Movement: 3.94 m/s
+- Skill order: W -> Q1 -> (Q2 if window active) -> R, then despawns once queue ends
+- Judgments: temporarily all offensive skills are treated as Caution (yellow) for debugging; revert to Danger after tuning is complete
+
+### Skill W (Caution)
+- Cast: 0.4s telegraph; Justyna can keep moving during the cast
+- Target: picks a point up to 6.5m toward the player; circle radius 2.0m (fixed to that world position)
+- Behavior: Telegraph remains anchored; does not follow Justyna after it is placed
+
+### Skill Q1 (Caution, double sweep)
+- Cast1: 0.4s with a rectangle 6.25m x 1.8m; direction locks at cast start while the rectangle tracks her position
+- Hit1: resolves immediately after Cast1 finishes
+- Cast2: 0.4s reuse of the same rectangle/orientation, followed by the second hit
+- Post: Unlocks Q2 for 3.0s, but Q2 is locked for the first 0.4s after Q1 ends
+
+### Skill Q2 (Caution)
+- Availability: may only be used within 3.0s of finishing Q1 (after the 0.4s lockout); skipped if the window expires
+- Cast: 0.7s with a rectangle 7.0m x 1.5m that tracks her position while the aim angle stays fixed
+- Hit: single resolve at cast end
+
+### Skill E (Mobility)
+- No cast time; dashes 2.5m over 0.26s (utility only, no hitbox)
+- Cooldown: 2.0s; can be used while Q1/Q2/W are casting to help align hits; Q telegraphs move with the dash
+
+### Skill R (Caution, 8 pulses)
+- Cast: 0.5s; chooses an offset within 6.0m toward the player; circle radius 3.0m forms there
+- Channel: Fires pulses every 0.125s for 8 total hits; the area follows Justyna as she moves
+- Restrictions: While channeling R she moves at 60% speed and other skills are disabled
