@@ -5,7 +5,7 @@ Version: v0.4.1
 
 Current Focus (2025-09-20)
 - Debugging Justyna: all skill hits are marked as Caution (yellow) and telegraphs use caution colors until testing is done. Remember to revert to Danger values once QA is satisfied.
-- Balance tweak: Justyna R now refunds 1 Caution after every two successful pulses; `makeJustyna()` owns this via the new `onJustynaRHit` / `onJustynaRChannelEnd` callbacks.
+- Balance tweak: Justyna R now chips away the Caution life (3 total) by 0.25 per pulse; `makeJustyna()` owns this via the `onJustynaRHit` callback.
 - Key files for this debug pass: index.html (options checkbox), src/main.js (makeJustyna wiring), src/enemies/justyna.js (skill logic), docs/ENEMIES*.md (documented spec).
 - Per user request: always update this HANDOFF.md so future sessions can sync by reading it (they will be told simply "HANDOFF.mdを見て").
 
@@ -74,7 +74,7 @@ Haze (current spec highlights)
 
 Notes
 - Enemy Options: `ENEMY_OPTIONS` 配列（src/main.js）がスポーン候補とUIトグルを一元管理。全解除ボタンもここを参照するため、Justynaのような追加敵も自動で対象になる。全OFF時のフォールバック（Hisui〜Vanya）は `fallback: true` で区別。
-- Justyna's R pulses call `onJustynaRHit({ skill: 'R', enemy: 'Justyna', pulse, pulsesRemaining })` and notify `onJustynaRChannelEnd` on exit so the host can refund 1 Caution every two hits while still killing the player if no follow-up pulse lands.
+- Justyna's R pulses call `onJustynaRHit({ skill: 'R', enemy: 'Justyna', pulse, pulsesRemaining })` (0.25 Caution damage per pulse) and notify `onJustynaRChannelEnd` on exit.
 - Images used: touka_tia.png, hisui_touka_55px.png, abigail.png, Luku.png, Katja.png, darko.png, Vanya.png, Debi.png, Marlene.png.
 - New images: Haze.png（Haze）。
 
