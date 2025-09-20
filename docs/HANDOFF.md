@@ -21,7 +21,7 @@ Quick Start
 Controls & UI
 - Right-click: move to clicked world position（ページ全体でコンテキストメニューは抑止済み）。
 - Overlay: Start/Restart, score, and options panel.
-- Enemy Options: enable/disable spawn per enemy. Includes “Uncheck all” button（全OFF時はフォールバック候補のいずれかが出現）
+- Enemy Options: enable/disable spawn per enemy. “Uncheck all” button iterates `ENEMY_OPTIONS` で定義された敵リストを全解除（Justyna含む）。全OFF時はフォールバック候補のいずれかが出現。
 - Other: “要注意を無視する” toggles whether Caution hits count/end the game.
 
 Core Mechanics
@@ -66,7 +66,7 @@ Haze (current spec highlights)
 - RQ（Caution）: Trigger 13.0m（Feint 0s）→ [Cast 0.33s → 1.0m正方形弾（17 m/s）→ CD 0.6s]×4 → Post 0.1s。弾命中でプレイヤーに1秒間 slow(0.7x)。
 
 Notes
-- Enemy Options: “Uncheck all” button exists, but full-off fallback still spawns from default set (intentional per user).
+- Enemy Options: `ENEMY_OPTIONS` 配列（src/main.js）がスポーン候補とUIトグルを一元管理。全解除ボタンもここを参照するため、Justynaのような追加敵も自動で対象になる。全OFF時のフォールバック（Hisui〜Vanya）は `fallback: true` で区別。
 - Images used: touka_tia.png, hisui_touka_55px.png, abigail.png, Luku.png, Katja.png, darko.png, Vanya.png, Debi.png, Marlene.png.
 - New images: Haze.png（Haze）。
 
@@ -80,7 +80,7 @@ Add a New Enemy（手順）
 3) `src/main.js`：
    - 画像ロード: `let <name>Image` と `loadImage('img/<Name>.png')` を追加。
    - 生成関数 `make<Name>()` を実装（`onDanger`/`onCaution` コールバック、`sprite` 付与）。
-   - `allowedEnemyTypes()` と `makeRandomEnemyAllowed()` に分岐を追加。
+   - `ENEMY_OPTIONS` 配列に id/type/factory/fallback を追記（これで `allowedEnemyTypes()` / `makeRandomEnemyAllowed()` / 全解除ボタンが同期）。
    - オプションUI（Startパネル）にチェックボックスを追加（idは `opt-<name>`）。
 4) 仕様ドキュメント: `docs/ENEMIES.md`/`docs/ENEMIES_SUMMARY.md` に追記（任意）。
 詳細は `docs/ENEMY_TEMPLATE.md` 参照（パラメータ決定チェックリストあり）。
