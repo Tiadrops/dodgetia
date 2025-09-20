@@ -196,17 +196,66 @@ function makeHaze() {
 }
 
 function makeJustyna() {
-  const cautionHit = () => {
-    if (ignoreCautionSelected()) return;
-    state.cautionHits += 1;
-    if (state.cautionHits >= 3) gameOver();
+  let rCautionBuffer = 0;
+  let rPendingKO = false;
+
+  const resetJustynaR = () => {
+    rCautionBuffer = 0;
+    rPendingKO = false;
   };
+
+  const cautionHit = () => {
+    if (ignoreCautionSelected()) {
+      resetJustynaR();
+      return false;
+    }
+    state.cautionHits += 1;
+    resetJustynaR();
+    if (state.cautionHits >= 3) gameOver();
+    return true;
+  };
+
+  const handleJustynaRHit = () => {
+    if (ignoreCautionSelected()) {
+      resetJustynaR();
+      return false;
+    }
+    state.cautionHits += 1;
+    rCautionBuffer += 1;
+    if (rCautionBuffer >= 2) {
+      rCautionBuffer -= 2;
+      state.cautionHits = Math.max(0, state.cautionHits - 1);
+      rPendingKO = false;
+    } else if (state.cautionHits >= 3) {
+      rPendingKO = true;
+    }
+    if (state.cautionHits >= 3 && !rPendingKO) {
+      gameOver();
+      resetJustynaR();
+    }
+    return true;
+  };
+
+  const handleJustynaRChannelEnd = () => {
+    if (ignoreCautionSelected()) {
+      resetJustynaR();
+      return;
+    }
+    if (rPendingKO && state.cautionHits >= 3) {
+      rPendingKO = false;
+      gameOver();
+    }
+    resetJustynaR();
+  };
+
   return Enemies.Justyna({
     METER,
     player,
     bounds: { w: VIEW_W, h: VIEW_H },
     onDanger: cautionHit,
     onCaution: cautionHit,
+    onJustynaRHit: handleJustynaRHit,
+    onJustynaRChannelEnd: handleJustynaRChannelEnd,
     sprite: justynaImage,
   });
 }

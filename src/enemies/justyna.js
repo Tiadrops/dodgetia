@@ -397,7 +397,16 @@
         const dx = player.x - cx;
         const dy = player.y - cy;
         if (dx * dx + dy * dy <= rr * rr) {
-          if (cfg.onCaution) cfg.onCaution(); else if (cfg.onDanger) cfg.onDanger();
+          const pulseIndex = R_PULSES - e.rHits + 1;
+          const payload = { skill: 'R', enemy: 'Justyna', pulse: pulseIndex, pulsesRemaining: e.rHits - 1 };
+          if (cfg.onJustynaRHit) {
+            cfg.onJustynaRHit(payload);
+          } else if (cfg.onCaution) {
+            // Fallback: treat like a standard Caution hit if the host does not supply the specialized handler.
+            cfg.onCaution(payload);
+          } else if (cfg.onDanger) {
+            cfg.onDanger();
+          }
         }
         e.rTele.flash = 0.12;
       }
@@ -521,6 +530,7 @@
             e.rHits -= 1;
             e.rTimer += R_DELAY;
             if (e.rHits <= 0) {
+              if (cfg.onJustynaRChannelEnd) cfg.onJustynaRChannelEnd({ enemy: 'Justyna' });
               if (e.rTele) e.rTele.dissolve = true;
               e.r_active = false;
               afterSkill();

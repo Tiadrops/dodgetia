@@ -5,6 +5,7 @@ Version: v0.4.1
 
 Current Focus (2025-09-20)
 - Debugging Justyna: all skill hits are marked as Caution (yellow) and telegraphs use caution colors until testing is done. Remember to revert to Danger values once QA is satisfied.
+- Balance tweak: Justyna R now refunds 1 Caution after every two successful pulses; `makeJustyna()` owns this via the new `onJustynaRHit` / `onJustynaRChannelEnd` callbacks.
 - Key files for this debug pass: index.html (options checkbox), src/main.js (makeJustyna wiring), src/enemies/justyna.js (skill logic), docs/ENEMIES*.md (documented spec).
 - Per user request: always update this HANDOFF.md so future sessions can sync by reading it (they will be told simply "HANDOFF.mdを見て").
 
@@ -45,6 +46,12 @@ Code Layout
 - src/enemies/haze.js: Haze split. MS=3.98。Q/W/RQ を1回ずつ実行して退場（順序ランダム）。RQ弾に当たると1秒間プレイヤー速度0.7倍。
 - docs/ENEMIES.md, docs/ENEMIES_SUMMARY.md: specs and summary (both at v0.4.1).
 
+Documentation Guide
+- docs/HANDOFF.md (this file): session status, key reminders, quick navigation pointers.
+- docs/ENEMIES.md: full per-enemy design document with timelines, geometry, and behavioral rules.
+- docs/ENEMIES_SUMMARY.md: quick-reference bullet list of enemy stats for tuning and QA checklists.
+- docs/ENEMY_TEMPLATE.md: reusable template/checklist when drafting new enemies or major reworks.
+
 Debi & Marlene (current spec highlights)
 - Feint: DQ/DE/MQ/ME = 0.0–0.25s. R = 0.0–0.5s.
 - Triggers:
@@ -67,6 +74,7 @@ Haze (current spec highlights)
 
 Notes
 - Enemy Options: `ENEMY_OPTIONS` 配列（src/main.js）がスポーン候補とUIトグルを一元管理。全解除ボタンもここを参照するため、Justynaのような追加敵も自動で対象になる。全OFF時のフォールバック（Hisui〜Vanya）は `fallback: true` で区別。
+- Justyna's R pulses call `onJustynaRHit({ skill: 'R', enemy: 'Justyna', pulse, pulsesRemaining })` and notify `onJustynaRChannelEnd` on exit so the host can refund 1 Caution every two hits while still killing the player if no follow-up pulse lands.
 - Images used: touka_tia.png, hisui_touka_55px.png, abigail.png, Luku.png, Katja.png, darko.png, Vanya.png, Debi.png, Marlene.png.
 - New images: Haze.png（Haze）。
 
