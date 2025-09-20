@@ -226,17 +226,17 @@
       const dist = Math.hypot(dx, dy) || 1;
       const reach = Math.min(dist, R_MAX_OFFSET);
       const ang = Math.atan2(dy, dx);
-      const offx = Math.cos(ang) * reach;
-      const offy = Math.sin(ang) * reach;
-      e.rTele = { ox: offx, oy: offy, flash: 0, dissolve: false };
+      const cx = clamp(e.x + Math.cos(ang) * reach, 0, W);
+      const cy = clamp(e.y + Math.sin(ang) * reach, 0, H);
+      e.rTele = { x: cx, y: cy, flash: 0, dissolve: false };
       e.rHits = R_PULSES;
       e.rTimer = R_DELAY;
     }
 
     function applyRHit(){
       if (e.rTele) {
-        const cx = clamp(e.x + e.rTele.ox, 0, W);
-        const cy = clamp(e.y + e.rTele.oy, 0, H);
+        const cx = clamp(e.rTele.x, 0, W);
+        const cy = clamp(e.rTele.y, 0, H);
         const rr = R_RADIUS + player.radius;
         const dx = player.x - cx;
         const dy = player.y - cy;
@@ -410,8 +410,8 @@
       if (!e.rTele) return;
       const active = (e.state === 'R_cast' || e.state === 'R_channel');
       if (!active && e.rTele.flash <= 0) return;
-      const cx = clamp(e.x + e.rTele.ox, 0, W);
-      const cy = clamp(e.y + e.rTele.oy, 0, H);
+      const cx = clamp(e.rTele.x, 0, W);
+      const cy = clamp(e.rTele.y, 0, H);
       const flash = e.rTele.flash > 0;
       ctx.save();
       ctx.globalAlpha = flash ? 0.55 : 0.35;
