@@ -21,10 +21,14 @@
     const W = cfg.bounds.w, H = cfg.bounds.h;
 
     const SPEED = 3.94 * M;
+    const PREFERRED_RANGE = 6.0 * M;
+    const RANGE_DEADZONE = 0.12 * M;
+    const FEINT_DELAY_MAX = 0.5;
 
     const W_CAST = 0.40;
     const W_RANGE = 6.5 * M;
     const W_RADIUS = 2.0 * M;
+    const W_TRIGGER_DIST = 8.5 * M;
 
     const Q1_CAST = 0.40;
     const Q1_LEN = 6.25 * M;
@@ -48,7 +52,7 @@
     const R_PULSES = 8;
     const R_RADIUS = 3.0 * M;
     const R_MAX_OFFSET = 6.0 * M;
-    const R_TRIGGER = R_MAX_OFFSET + R_RADIUS;
+    const R_TRIGGER_DIST = 9.0 * M;
     const R_SPEED_FACTOR = 0.60;
 
     const PAD = 40;
@@ -74,6 +78,7 @@
       r_active: false,
       rHits: 0,
       rTimer: 0,
+      pendingSkill: null,
     };
 
     (function spawn(){
@@ -86,17 +91,33 @@
 
     function currentSpeedFactor(){ return e.r_active ? R_SPEED_FACTOR : 1; }
 
-    function steerTowardsPlayer(dt, factor = 1){
+    function steerTowardsPreferredRange(dt, factor = 1){
       if (e.dash) return;
       const dx = player.x - e.x;
       const dy = player.y - e.y;
-      const d = Math.hypot(dx, dy) || 1;
+      const dist = Math.hypot(dx, dy);
+      const desired = PREFERRED_RANGE;
+      const delta = dist - desired;
       const speed = SPEED * factor;
-      e.x += (dx / d) * speed * dt;
-      e.y += (dy / d) * speed * dt;
+      const absDelta = Math.abs(delta);
+      if (absDelta > RANGE_DEADZONE) {
+        const direction = delta > 0 ? 1 : -1;
+        const move = Math.min(speed * dt, absDelta);
+        let ux = 0;
+        let uy = 0;
+        if (dist > 0) {
+          const inv = 1 / dist;
+          ux = dx * inv;
+          uy = dy * inv;
+        } else {
+          ux = (e.facing >= 0) ? 1 : -1;
+        }
+        const nx = clamp(e.x + ux * move * direction, 0, W);
+        const ny = clamp(e.y + uy * move * direction, 0, H);
+        e.x = nx;
+        e.y = ny;
+      }
       e.facing = (dx >= 0) ? 1 : -1;
-      e.x = clamp(e.x, 0, W);
-      e.y = clamp(e.y, 0, H);
     }
 
     function updateDash(dt){
@@ -255,6 +276,7 @@
       }
       e.state = 'move';
       e.t = 0;
+      e.pendingSkill = null;
     }
 
     function applyRectHit(len, wid, ang){
@@ -335,6 +357,38 @@
       e.rTimer = R_DELAY;
     }
 
+    function queueSkillWithFeint(type){
+      const delay = Math.random() * FEINT_DELAY_MAX;
+      if (delay <= 0) {
+        if (type === 'W') startW();
+        else if (type === 'R') startR();
+        return;
+      }
+      e.pendingSkill = { type, timer: delay };
+    }
+
+    function updatePendingSkill(dt){
+      if (!e.pendingSkill) return;
+      if (e.queue[0] !== e.pendingSkill.type) {
+        e.pendingSkill = null;
+        return;
+      }
+      e.pendingSkill.timer -= dt;
+      if (e.pendingSkill.timer > 0) return;
+      const type = e.pendingSkill.type;
+      const dx = player.x - e.x;
+      const dy = player.y - e.y;
+      const dist = Math.hypot(dx, dy);
+      const inRange = (type === 'W') ? (dist <= W_TRIGGER_DIST) : (dist <= R_TRIGGER_DIST);
+      if (!inRange) {
+        e.pendingSkill = null;
+        return;
+      }
+      e.pendingSkill = null;
+      if (type === 'W') startW();
+      else if (type === 'R') startR();
+    }
+
     function applyRHit(){
       if (e.rTele) {
         const cx = clamp(e.rTele.x, 0, W);
@@ -383,6 +437,7 @@
       e.q2Window = Math.max(0, e.q2Window - dt);
       updateDash(dt);
       purgeTelegraphs(dt);
+      updatePendingSkill(dt);
 
       switch (e.state) {
         case 'spawn_idle': {
@@ -401,26 +456,30 @@
           } else if (next === 'Q2' && e.q2Lock <= 0 && e.q2Window > 0) {
             maybeTriggerEFor('Q2', Math.atan2(dy, dx));
           }
-          steerTowardsPlayer(dt, currentSpeedFactor());
+          steerTowardsPreferredRange(dt, currentSpeedFactor());
           if (next === 'W') {
-            if (dist <= W_RANGE + 15) startW();
+            if (!e.pendingSkill && dist <= W_TRIGGER_DIST) {
+              queueSkillWithFeint('W');
+            }
           } else if (next === 'Q1') {
             if (dist <= Q1_TRIG) startQ1();
           } else if (next === 'Q2') {
             if (e.q2Lock <= 0 && e.q2Window > 0 && dist <= Q2_TRIG) startQ2();
           } else if (next === 'R') {
-            if (dist <= R_TRIGGER) startR();
+            if (!e.pendingSkill && dist <= R_TRIGGER_DIST) {
+              queueSkillWithFeint('R');
+            }
           }
           break;
         }
         case 'W_cast': {
-          steerTowardsPlayer(dt, currentSpeedFactor());
+          steerTowardsPreferredRange(dt, currentSpeedFactor());
           if (e.t >= W_CAST) { applyW(); }
           break;
         }
         case 'Q1_cast1': {
           if (e.qRect) maybeTriggerEFor('Q1', e.qRect.ang);
-          steerTowardsPlayer(dt, currentSpeedFactor());
+          steerTowardsPreferredRange(dt, currentSpeedFactor());
           if (e.t >= Q1_CAST) {
             e.t = 0;
             applyRectHit(Q1_LEN, Q1_WIDTH, e.qAng);
@@ -430,7 +489,7 @@
         }
         case 'Q1_cast2': {
           if (e.qRect) maybeTriggerEFor('Q1', e.qRect.ang);
-          steerTowardsPlayer(dt, currentSpeedFactor());
+          steerTowardsPreferredRange(dt, currentSpeedFactor());
           if (e.t >= Q1_CAST) {
             applyRectHit(Q1_LEN, Q1_WIDTH, e.qAng);
             finishQ1();
@@ -439,7 +498,7 @@
         }
         case 'Q2_cast': {
           if (e.qRect) maybeTriggerEFor('Q2', e.qRect.ang);
-          steerTowardsPlayer(dt, currentSpeedFactor());
+          steerTowardsPreferredRange(dt, currentSpeedFactor());
           if (e.t >= Q2_CAST) {
             applyRectHit(Q2_LEN, Q2_WIDTH, e.qAng);
             finishQ2();
@@ -447,7 +506,7 @@
           break;
         }
         case 'R_cast': {
-          steerTowardsPlayer(dt, currentSpeedFactor());
+          steerTowardsPreferredRange(dt, currentSpeedFactor());
           if (e.t >= R_CAST) {
             e.state = 'R_channel';
             e.t = 0;
@@ -455,7 +514,7 @@
           break;
         }
         case 'R_channel': {
-          steerTowardsPlayer(dt, currentSpeedFactor());
+          steerTowardsPreferredRange(dt, currentSpeedFactor());
           e.rTimer -= dt;
           if (e.rTimer <= 0 && e.rHits > 0) {
             applyRHit();
