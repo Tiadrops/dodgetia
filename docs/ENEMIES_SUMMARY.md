@@ -64,7 +64,7 @@
 - W: Cast 0.4s; Caution circle radius 2.0m at a point up to 6.5m away (anchored in world)
 - Q1: Two Caution sweeps; each cast 0.4s for a rectangle 6.25m x 1.8m that follows her position while the angle is locked; unlocks Q2 for 3.0s but Q2 stays locked for 0.4s after Q1 completes; skipped if the window expires
 - Q2: Cast 0.7s; Caution rectangle 7.0m x 1.5m, only usable inside the Q1 window
-- R: Cast 0.5s then 8 Caution pulses every 0.125s in a circle radius 3.0m offset up to 6.0m; area follows her and movement is at 60% with other skills disabled
+- R: Cast 0.5s then 8 Caution pulses every 0.125s in a circle radius 3.0m offset up to 6.0m; area follows her and movement is at 60% with other skills disabled; every two successful hits refund 1 Caution (floored at 0) to soften the sustained damage—refunds only apply if both pulses actually land
 
 Notes
 - Colors: Danger = red, Caution = yellow (both telegraph and projectiles follow this)
