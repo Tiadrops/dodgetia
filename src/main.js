@@ -211,27 +211,27 @@ function makeJustyna() {
   });
 }
 
+const ENEMY_OPTIONS = [
+  { id: 'opt-hisui', type: 'Hisui', factory: makeHisui, fallback: true },
+  { id: 'opt-abigail', type: 'Abigail', factory: makeAbigail, fallback: true },
+  { id: 'opt-luku', type: 'Luku', factory: makeLuku, fallback: true },
+  { id: 'opt-katja', type: 'Katja', factory: makeKatja, fallback: true },
+  { id: 'opt-darko', type: 'Darko', factory: makeDarko, fallback: true },
+  { id: 'opt-vanya', type: 'Vanya', factory: makeVanya, fallback: true },
+  { id: 'opt-debimarlene', type: 'DebiMarlene', factory: makeDebiMarlene, fallback: false },
+  { id: 'opt-haze', type: 'Haze', factory: makeHaze, fallback: false },
+  { id: 'opt-justyna', type: 'Justyna', factory: makeJustyna, fallback: false },
+];
+
+const FALLBACK_ENEMY_TYPES = ENEMY_OPTIONS.filter(opt => opt.fallback).map(opt => opt.type);
+
 function allowedEnemyTypes() {
-  const hisuiEl = document.getElementById('opt-hisui');
-  const abelEl = document.getElementById('opt-abigail');
-  const lukuEl = document.getElementById('opt-luku');
-  const katjaEl = document.getElementById('opt-katja');
-  const darkoEl = document.getElementById('opt-darko');
-  const vanyaEl = document.getElementById('opt-vanya');
-  const dmEl = document.getElementById('opt-debimarlene');
-  const hazeEl = document.getElementById('opt-haze');
-  const justynaEl = document.getElementById('opt-justyna');
   const allowed = [];
-  if (!hisuiEl || hisuiEl.checked) allowed.push('Hisui');
-  if (!abelEl || abelEl.checked) allowed.push('Abigail');
-  if (!lukuEl || lukuEl.checked) allowed.push('Luku');
-  if (!katjaEl || katjaEl.checked) allowed.push('Katja');
-  if (!darkoEl || darkoEl.checked) allowed.push('Darko');
-  if (!vanyaEl || vanyaEl.checked) allowed.push('Vanya');
-  if (!dmEl || dmEl.checked) allowed.push('DebiMarlene');
-  if (!hazeEl || hazeEl.checked) allowed.push('Haze');
-  if (!justynaEl || justynaEl.checked) allowed.push('Justyna');
-  if (allowed.length === 0) return ['Hisui','Abigail','Luku','Katja','Darko','Vanya'];
+  ENEMY_OPTIONS.forEach(opt => {
+    const el = document.getElementById(opt.id);
+    if (!el || el.checked) allowed.push(opt.type);
+  });
+  if (allowed.length === 0) return FALLBACK_ENEMY_TYPES.slice();
   return allowed;
 }
 
@@ -243,14 +243,8 @@ function ignoreCautionSelected() {
 function makeRandomEnemyAllowed() {
   const types = allowedEnemyTypes();
   const t = types[Math.floor(Math.random() * types.length)];
-  if (t === 'Abigail') return makeAbigail();
-  if (t === 'Luku') return makeLuku();
-  if (t === 'Katja') return makeKatja();
-  if (t === 'Darko') return makeDarko();
-  if (t === 'Vanya') return makeVanya();
-  if (t === 'DebiMarlene') return makeDebiMarlene();
-  if (t === 'Haze') return makeHaze();
-  if (t === 'Justyna') return makeJustyna();
+  const entry = ENEMY_OPTIONS.find(opt => opt.type === t);
+  if (entry && entry.factory) return entry.factory();
   return makeHisui();
 }
 
@@ -303,11 +297,8 @@ ovBtn.addEventListener('click', () => {
 // Uncheck all enemy options at once
 if (uncheckBtn) {
   uncheckBtn.addEventListener('click', () => {
-    const ids = [
-      'opt-hisui','opt-abigail','opt-luku','opt-katja','opt-darko','opt-vanya','opt-debimarlene','opt-haze'
-    ];
-    ids.forEach(id => {
-      const el = document.getElementById(id);
+    ENEMY_OPTIONS.forEach(opt => {
+      const el = document.getElementById(opt.id);
       if (el) el.checked = false;
     });
   });
