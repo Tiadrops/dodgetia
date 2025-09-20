@@ -182,3 +182,4 @@ Notes
 - Cast: 0.5s; chooses an offset within 6.0m toward the player; circle radius 3.0m forms there
 - Channel: Fires pulses every 0.125s for 8 total hits; the area follows Justyna as she moves
 - Restrictions: While channeling R she moves at 60% speed and other skills are disabled
+- Mitigation: Every two successful hits refund 1 Caution (never dropping below 0) to offset the unusually long channel; if the follow-up pulse never lands before the channel ends, the refund is skipped
