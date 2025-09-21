@@ -19,21 +19,23 @@
     const W = cfg.bounds.w;
     const H = cfg.bounds.h;
 
-    const MOVE_SPEED = 3.85 * M;
+    const MOVE_SPEED = 3.9 * M;
 
     const E_TRIGGER_RANGE = 7.0 * M;
+    const E_FEINT_MAX = 0.5;
 
     const E1_TIME = 0.2;
     const E1_DIST = 3.0 * M;
     const E1_SPEED = E1_DIST / Math.max(E1_TIME, 0.0001);
 
-    const E2_FEINT_MAX = 0.25;
+    const E2_FEINT_MAX = 0;
     const E2_CAST = 0.4;
     const E2_LENGTH = 5.0 * M;
     const E2_WIDTH = 2.0 * M;
     const E2_POST = 0.35;
 
     const R_TRIGGER_RANGE = 7.5 * M;
+    const R_FEINT_MAX = 0.5;
     const R_CAST = 0.5;
     const R_RANGE = 4.0 * M;
     const R_RADIUS = 2.5 * M;
@@ -54,11 +56,11 @@
       dead: false,
       state: 'spawn_idle',
       t: 0,
-      forceTimer: 0,
       queue: ['Ecombo', 'R'],
       // E1
       e1_ang: 0,
       e1_travel: 0,
+      e_feint: 0,
       // E2
       e2_ang: 0,
       e2_ox: 0,
@@ -67,6 +69,7 @@
       // R
       r_tx: 0,
       r_ty: 0,
+      r_feint: 0,
     };
 
     (function spawn(){
@@ -99,7 +102,13 @@
       }
       e.state = 'move';
       e.t = 0;
-      e.forceTimer = 0;
+    }
+
+    function startEFeint() {
+      e.state = 'E_feint';
+      e.t = 0;
+      e.e_feint = Math.random() * E_FEINT_MAX;
+      e.facing = (player.x - e.x >= 0) ? 1 : -1;
     }
 
     function startE1() {
@@ -109,7 +118,6 @@
       e.e1_ang = ang;
       e.e1_travel = 0;
       e.facing = (Math.cos(ang) >= 0) ? 1 : -1;
-      e.forceTimer = 0;
     }
 
     function startE2Feint() {
@@ -162,10 +170,16 @@
       e.t = 0;
     }
 
+    function startRFeint() {
+      e.state = 'R_feint';
+      e.t = 0;
+      e.r_feint = Math.random() * R_FEINT_MAX;
+      e.facing = (player.x - e.x >= 0) ? 1 : -1;
+    }
+
     function startR() {
       e.state = 'R_cast';
       e.t = 0;
-      e.forceTimer = 0;
       const dx = player.x - e.x;
       const dy = player.y - e.y;
       const dist = Math.hypot(dx, dy);
@@ -210,20 +224,27 @@
           break;
         }
         case 'move': {
-          e.forceTimer += dt;
           steerTowardsPlayer(dt);
           const dx = player.x - e.x;
           const dy = player.y - e.y;
           const d = Math.hypot(dx, dy);
           const next = e.queue[0];
           if (next === 'Ecombo') {
-            if (d <= E_TRIGGER_RANGE || e.forceTimer >= 2.0) {
-              startE1();
+            if (d <= E_TRIGGER_RANGE) {
+              startEFeint();
             }
           } else if (next === 'R') {
-            if (d <= R_TRIGGER_RANGE || e.forceTimer >= 2.0) {
-              startR();
+            if (d <= R_TRIGGER_RANGE) {
+              startRFeint();
             }
+          }
+          break;
+        }
+        case 'E_feint': {
+          steerTowardsPlayer(dt);
+          e.facing = (player.x - e.x >= 0) ? 1 : -1;
+          if (e.t >= e.e_feint) {
+            startE1();
           }
           break;
         }
@@ -247,6 +268,14 @@
         case 'E2_post': {
           if (e.t >= E2_POST) {
             afterSkill();
+          }
+          break;
+        }
+        case 'R_feint': {
+          steerTowardsPlayer(dt);
+          e.facing = (player.x - e.x >= 0) ? 1 : -1;
+          if (e.t >= e.r_feint) {
+            startR();
           }
           break;
         }
@@ -331,3 +360,5 @@
     };
   };
 })();
+
+

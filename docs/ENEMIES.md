@@ -17,22 +17,22 @@ Counters
 - Units: 1m = 55px (fixed)
 - Movement: 4.11 m/s chasing the player
 - Skills: Uses each exactly once in random order, then leaves
-  - Feint: When target is in range for the chosen skill, Hisui keeps approaching for 0.0–0.5s before executing
+  - Feint: When target is in range for the chosen skill, Hisui keeps approaching for 0.0 E.5s before executing
 
 ### Skill W2 (formerly A)
 - Telegraph: 0.5s (immobile)
-- Hit: Forward rectangle 7.2m × 1.2m at the end of telegraph
+- Hit: Forward rectangle 7.2m ÁE1.2m at the end of telegraph
  - Judgment: Danger (red)
 
 ### Skill E (formerly B)
-- Sequence: 0.13s back 2m → 0.325s wait → 0.25s forward 6m → 0.25s wait
+- Sequence: 0.13s back 2m ↁE0.325s wait ↁE0.25s forward 6m ↁE0.25s wait
 - Damage window: During the 0.25s forward dash, circular AoE of radius 1.2m centered on Hisui
  - Engage range for feint/trigger: 4m
  - Judgment: Danger (red)
 
 ### Skill R
 - Cast1: 0.5s, then hit in a forward semicircle of radius 5.0m
-- Cast2: 0.625s, then hit in a forward rectangle 5.5m × 2.0m
+- Cast2: 0.625s, then hit in a forward rectangle 5.5m ÁE2.0m
 - Wait: 0.25s
 - Judgment: Semicircle = Caution (yellow), Rectangle = Danger (red)
 
@@ -87,12 +87,12 @@ Counters
 
 - Units: 1m = 55px (fixed)
 - Movement: 3.85 m/s
-- Skills: Q, E, R — uses each once (Q/R allow acting while effect pending)
+- Skills: Q, E, R  Euses each once (Q/R allow acting while effect pending)
 
 ### Skill Q (Danger)
 - Cast: 0.25s, no preview
 - Projectile: circle r=0.8m, speed 10.6 m/s, out-and-back
-- Path: Outbound 7.5m → reverse toward Vanya at 11 m/s for 7.5m → disappears
+- Path: Outbound 7.5m ↁEreverse toward Vanya at 11 m/s for 7.5m ↁEdisappears
 - Vanya can act immediately after launching; hit anytime causes Danger
 
 ### Skill E (Danger)
@@ -109,22 +109,22 @@ Counters
 
 - States: Debi and Marlene (switch via E). Start state is random.
 - Order:
-- Start Debi: DQ → DE → MQ → ME → R
-- Start Marlene: MQ → ME → DQ → DE → R
+- Start Debi: DQ ↁEDE ↁEMQ ↁEME ↁER
+- Start Marlene: MQ ↁEME ↁEDQ ↁEDE ↁER
 
 ### Marlene Q (Caution + Debi dash)
 - Cast: 0.166s (no preview)
 - Projectile: circle r=0.5m, speed 20 m/s, range 6.25m (Caution)
-- If Debi is placed: Debi dashes with a 1.5m × 1.2m sweep for 4.5m over 0.30s (Danger); Debi marker is removed after
+- If Debi is placed: Debi dashes with a 1.5m ÁE1.2m sweep for 4.5m over 0.30s (Danger); Debi marker is removed after
 
 ### Marlene E (Danger)
 - Cast: 0.2s (no preview)
-- Self dash: 1.5m × 1.2m sweep for 4.5m over 0.30s
+- Self dash: 1.5m ÁE1.2m sweep for 4.5m over 0.30s
 - Places Marlene marker, switches to Debi, then moves-only for 0.5s
 
 ### Debi Q (Caution)
 - Cast: 0.15s (no preview)
-- Front rectangle: 4.5m × 1.0m (Caution)
+- Front rectangle: 4.5m ÁE1.0m (Caution)
 - If Marlene is placed: Debi projectile r=0.8m, 18 m/s, 6m (Caution), then remove Marlene marker
 
 ### Debi E (Danger)
@@ -133,7 +133,7 @@ Counters
 - Places Debi marker, switches to Marlene, then moves-only for 0.5s
 
 ### R (Danger)
-- Cast: 0.67s with preview → Rectangle 8m × 2m, then blink to opposite edge and wait 0.6s
+- Cast: 0.67s with preview ↁERectangle 8m ÁE2m, then blink to opposite edge and wait 0.6s
 
 ## Darko (v0.4.1)
 
@@ -142,7 +142,7 @@ Counters
 - Skills: Only E, then leaves
 
 ### Skill E (Danger)
-- Feint: 0.0–0.5s when within trigger range
+- Feint: 0.0 E.5s when within trigger range
 - Trigger range: 6.2m (from Darko to player)
 - Cast: 0.6s with preview (shows destination AoE at cast start)
 - Effect: Blinks/steps 4.0m forward toward the player and applies a circular AoE, radius 2.2m, at the arrival point (Danger)
@@ -151,7 +151,7 @@ Counters
 Notes
 - On spawn: 1.0s idle before acting (no skills during this time)
 
-## Justyna (v0.4.2 debug)
+## Isaac (v0.4.1)\r\n\r\n- Units: 1m = 55px (fixed)\r\n- Movement: 3.9 m/s\r\n- Behavior: Executes the E combo once, then casts R and despawns\r\n\r\n### Skill E1 (Mobility)\r\n- Trigger: Player within 7.0m (shares trigger with the combo) with a 0.0?0.5s feint while pursuing\r\n- Dash: Moves 3.0m in 0.2s toward the chosen angle; no hitbox and immediately links into E2\r\n\r\n### Skill E2 (Danger)\r\n- Cast: 0.4s with a forward rectangle telegraph (5.0m by 2.0m) aligned to the E1 dash direction\r\n- Hit: Danger rectangle resolves at cast end; post-delay 0.35s before moving on\r\n\r\n### Skill R (Caution blink)\r\n- Trigger: Player within 7.5m with a 0.0?0.5s feint while closing in\r\n- Cast: 0.5s with a circle telegraph (radius 2.5m) at a target within 4.0m; telegraph color uses caution yellow\r\n- Hit: Caution circle resolves and Isaac blinks to the target point; post-delay 0.35s\r\n\r\n## Justyna (v0.4.2 debug)
 
 - Units: 1m = 55px (fixed)
 - Movement: 3.94 m/s
@@ -183,3 +183,5 @@ Notes
 - Channel: Fires pulses every 0.125s for 8 total hits; the area follows Justyna as she moves
 - Restrictions: While channeling R she moves at 60% speed and other skills are disabled
 - Mitigation: Each pulse chips 0.25 from the player's Caution life (3 total), letting the full channel build up to a lethal threat without requiring paired hits
+
+
