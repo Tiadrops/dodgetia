@@ -15,7 +15,7 @@ const VIEW_W = 960;
 const VIEW_H = 540;
 
 // Version (provided by user)
-const VERSION = '0.4.1';
+const VERSION = '0.4.2';
 
 // HiDPI scaling to keep crisp rendering
 function setupHiDPI() {
@@ -541,3 +541,4 @@ window.applyPlayerSlow = function(factor, durationSec) {
   player.slowFactor = factor;
   player.slowRemain = Math.max(player.slowRemain || 0, durationSec);
 };
+
