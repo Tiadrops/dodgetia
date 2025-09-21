@@ -55,6 +55,7 @@ let debiImage;
 let marleneImage;
 let hazeImage;
 let justynaImage;
+let isaacImage;
 
 // Units: 1m = 55px (fixed)
 const METER = 55;
@@ -195,6 +196,21 @@ function makeHaze() {
   });
 }
 
+function makeIsaac() {
+  return Enemies.Isaac({
+    METER,
+    player,
+    bounds: { w: VIEW_W, h: VIEW_H },
+    onDanger: () => { state.dangerHits += 1; gameOver(); },
+    onCaution: () => {
+      if (ignoreCautionSelected()) return;
+      state.cautionHits += 1;
+      if (state.cautionHits >= 3) gameOver();
+    },
+    sprite: isaacImage,
+  });
+}
+
 function makeJustyna() {
   const applyCautionDamage = amount => {
     if (ignoreCautionSelected()) return false;
@@ -230,6 +246,7 @@ const ENEMY_OPTIONS = [
   { id: 'opt-vanya', type: 'Vanya', factory: makeVanya, fallback: true },
   { id: 'opt-debimarlene', type: 'DebiMarlene', factory: makeDebiMarlene, fallback: false },
   { id: 'opt-haze', type: 'Haze', factory: makeHaze, fallback: false },
+  { id: 'opt-isaac', type: 'Isaac', factory: makeIsaac, fallback: false },
   { id: 'opt-justyna', type: 'Justyna', factory: makeJustyna, fallback: false },
 ];
 
@@ -489,10 +506,10 @@ function loop(now) {
     hisuiImage = await loadImage('img/hisui_touka_55px.png');
     abigailImage = await loadImage('img/abigail.png');
     try {
-      lukuImage = await loadImage('img/Luku.png');
+      lukuImage = await loadImage('img/Luke.png');
     } catch (_) {
-      // Fallback to Luke.png if provided under that name
-      try { lukuImage = await loadImage('img/Luke.png'); } catch (__) {}
+      // Fallback to Luku.png if provided under that name
+      try { lukuImage = await loadImage('img/Luku.png'); } catch (__) {}
     }
     try {
       katjaImage = await loadImage('img/Katja.png');
@@ -507,6 +524,7 @@ function loop(now) {
     try { marleneImage = await loadImage('img/Marlene.png'); } catch (_______) {}
     try { hazeImage = await loadImage('img/Haze.png'); } catch (________) {}
     try { justynaImage = await loadImage('img/Justyna.png'); } catch (_________) {}
+    try { isaacImage = await loadImage('img/Isaac.png'); } catch (__________) {}
   } catch (e) {
     console.warn('Failed to load sprite, using fallback circle', e);
   }
